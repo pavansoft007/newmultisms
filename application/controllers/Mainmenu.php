@@ -16,9 +16,17 @@ class Mainmenu extends Admin_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->data = []; // Initialize $data property
+        // DO NOT overwrite parent data property!
+        // $this->data = []; // REMOVE THIS LINE
         $this->load->library('session'); // Load session library
         $this->load->model('role_model'); // Load role_model
+        $this->load->database();
+        
+        // Load all necessary helpers
+        $this->load->helper('url');
+        $this->load->helper('form');
+        $this->load->helper('common');
+        $this->load->helper('menu');
         
         // Enable error reporting for debugging
         ini_set('display_errors', 1);
@@ -35,8 +43,6 @@ class Mainmenu extends Admin_Controller
         $data = [];
         // Get user role ID
         $role_id = $this->session->userdata('loggedin_role_id');
-        // Load menu_helper to ensure get_main_menu_items is available
-        $this->load->helper('menu');
         // Get all modules
         try {
             $data['modules'] = $this->role_model->getModulesList();
@@ -53,13 +59,18 @@ class Mainmenu extends Admin_Controller
             log_message('error', 'Error getting permissions: ' . $e->getMessage());
         }
         // Get all menu items from sidebar
-        $data['menu_items'] = get_main_menu_items($role_id);
+        try {
+            $data['menu_items'] = get_main_menu_items($role_id);
+        } catch (Exception $e) {
+            $data['menu_items'] = array();
+            log_message('error', 'Error getting menu items: ' . $e->getMessage());
+        }
         // Get user info
         $data['user_name'] = $this->session->userdata('name');
         $data['user_role'] = loggedin_role_name();
-        // Ensure $theme_config is initialized before passing to views
-        $data['theme_config'] = isset($data['theme_config']) ? $data['theme_config'] : [];
-        $data['theme_config']['border_mode'] = isset($data['theme_config']['border_mode']) ? $data['theme_config']['border_mode'] : 'true';
+        // Get theme and global config from MY_Controller
+        $data['theme_config'] = $this->data['theme_config'];
+        $data['global_config'] = $this->data['global_config'];
         $data['title'] = translate('main_menu');
         $data['main_menu'] = 'dashboard';
         $data['sub_page'] = 'main_menu_web';
@@ -95,8 +106,6 @@ class Mainmenu extends Admin_Controller
             }
         }
         $data['is_mobile'] = $is_mobile;
-        // Ensure $global_config is set for views
-        $data['global_config'] = isset($this->global_config) ? $this->global_config : array();
         // Pass alert messages to view to avoid using session in view
         $alertclass = "";
         $alert_message = "";
