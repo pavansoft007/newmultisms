@@ -1,0 +1,51 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# XAMPP specific
+xamppfiles/
+*.log
+
+# Composer dependencies
+/vendor/
+
+# Node dependencies
+/node_modules/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Environment files
+.env
+.env.*
+
+# Cache and session files
+/cache/
+*.cache
+*.session
+
+# PHPUnit
+phpunit.xml
+phpunit.xml.dist
+
+# User uploads
+/uploads/
+
+# Backup files
+*.bak
+*.tmp
+*.swp
+*.swo
+
+# Other
+*.zip
+*.tar.gz
+*.tar
+*.gz
+*.7z
