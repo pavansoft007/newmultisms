@@ -1,0 +1,150 @@
+/* Sidebar Color Classes */
+.sidebar-color-blue {
+    background-color: #3A3978 !important;
+}
+
+.sidebar-color-green {
+    background-color: #28a745 !important;
+}
+
+.sidebar-color-purple {
+    background-color: #6f42c1 !important;
+}
+
+.sidebar-color-red {
+    background-color: #dc3545 !important;
+}
+
+.sidebar-color-dark {
+    background-color: #343a40 !important;
+}
+
+/* Sidebar Text Color Classes */
+.sidebar-text-light .sidebar-title,
+.sidebar-text-light .sidebar-header {
+    color: #fff !important;
+}
+
+.sidebar-text-dark .sidebar-title,
+.sidebar-text-dark .sidebar-header {
+    color: #333 !important;
+}
+
+/* Menu Text Color Classes */
+.menu-text-light .nav-main a {
+    color: #fff !important;
+}
+
+.menu-text-dark .nav-main a {
+    color: #333 !important;
+}
+
+.menu-text-primary .nav-main a {
+    color: #007bff !important;
+}
+
+/* Menu Background Color Classes */
+.menu-bg-light .nav-main > ul > li > a {
+    background-color: #f8f9fa !important;
+}
+
+.menu-bg-dark .nav-main > ul > li > a {
+    background-color: #343a40 !important;
+}
+
+.menu-bg-primary .nav-main > ul > li > a {
+    background-color: #007bff !important;
+}
+
+/* Active Menu Text Color Classes */
+.active-menu-text-light .nav-main li.nav-active > a {
+    color: #fff !important;
+}
+
+.active-menu-text-dark .nav-main li.nav-active > a {
+    color: #333 !important;
+}
+
+.active-menu-text-primary .nav-main li.nav-active > a {
+    color: #007bff !important;
+}
+
+/* Active Menu Background Classes */
+.active-menu-bg-light .nav-main li.nav-active > a {
+    background-color: #f8f9fa !important;
+}
+
+.active-menu-bg-dark .nav-main li.nav-active > a {
+    background-color: #343a40 !important;
+}
+
+.active-menu-bg-primary .nav-main li.nav-active > a {
+    background-color: #007bff !important;
+}
+
+/* Menu Hover Style Classes */
+.menu-hover-light .nav-main > ul > li > a:hover {
+    background-color: #f8f9fa !important;
+    color: #333 !important;
+}
+
+.menu-hover-dark .nav-main > ul > li > a:hover {
+    background-color: #343a40 !important;
+    color: #fff !important;
+}
+
+.menu-hover-primary .nav-main > ul > li > a:hover {
+    background-color: #007bff !important;
+    color: #fff !important;
+}
+
+/* Submenu Styling */
+.sidebar-color-blue .nav-main li.nav-parent.nav-expanded > a,
+.sidebar-color-green .nav-main li.nav-parent.nav-expanded > a,
+.sidebar-color-purple .nav-main li.nav-parent.nav-expanded > a,
+.sidebar-color-red .nav-main li.nav-parent.nav-expanded > a,
+.sidebar-color-dark .nav-main li.nav-parent.nav-expanded > a {
+    background-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Submenu Text Colors */
+.menu-text-light .nav-main .nav-children a {
+    color: #fff !important;
+}
+
+.menu-text-dark .nav-main .nav-children a {
+    color: #333 !important;
+}
+
+.menu-text-primary .nav-main .nav-children a {
+    color: #007bff !important;
+}
+
+/* Submenu Active Item */
+.active-menu-text-light .nav-main .nav-children li.nav-active > a {
+    color: #fff !important;
+}
+
+.active-menu-text-dark .nav-main .nav-children li.nav-active > a {
+    color: #333 !important;
+}
+
+.active-menu-text-primary .nav-main .nav-children li.nav-active > a {
+    color: #007bff !important;
+}
+
+/* Submenu Hover Effects */
+.menu-hover-light .nav-main .nav-children a:hover {
+    background-color: #f8f9fa !important;
+    color: #333 !important;
+}
+
+.menu-hover-dark .nav-main .nav-children a:hover {
+    background-color: #343a40 !important;
+    color: #fff !important;
+}
+
+.menu-hover-primary .nav-main .nav-children a:hover {
+    background-color: #007bff !important;
+    color: #fff !important;
+}

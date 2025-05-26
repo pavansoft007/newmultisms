@@ -70,6 +70,9 @@
 					</span>
 				</div>
 			</form>
+			<a href="<?php echo base_url('mainmenu'); ?>" class="mainmenu-header-btn hidden-xs" title="Main Menu">
+				<i class="fas fa-th-large"></i>
+			</a>
 		<?php endif;?>
 	</div>
 
