@@ -42,6 +42,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 grid-template-columns: repeat(2, 1fr); /* 2 columns for mobile */
                 gap: 8px;
             }
+            
         }
     </style>
     <style>
@@ -86,7 +87,162 @@ defined('BASEPATH') or exit('No direct script access allowed');
             .mainmenu-header-btn {
                 display: none !important;
             }
+            
         }
+        /* Child Selection Tabs */
+.child-selection-container {
+    margin-bottom: 24px;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.child-tabs-header {
+    background: #f8f9fa;
+    padding: 16px 20px 8px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.child-tabs-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.child-tabs-scroll {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.child-tabs-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.child-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 8px 0;
+    min-width: max-content;
+}
+
+.child-tab {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #666;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-width: 140px;
+    justify-content: flex-start;
+}
+
+.child-tab:hover {
+    border-color: #6750A4;
+    color: #6750A4;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(103, 80, 164, 0.15);
+}
+
+.child-tab.active {
+    background: linear-gradient(135deg, #6750A4, #7c63c7);
+    border-color: #6750A4;
+    color: white;
+    box-shadow: 0 4px 16px rgba(103, 80, 164, 0.3);
+}
+
+.child-tab.active:hover {
+    background: linear-gradient(135deg, #5a47a1, #6750A4);
+    color: white;
+}
+
+.child-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 10px;
+    border: 2px solid rgba(255,255,255,0.3);
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.child-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.child-name {
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 2px;
+}
+
+.child-class {
+    font-size: 11px;
+    opacity: 0.8;
+    line-height: 1;
+}
+
+/* Touch Effects */
+.touch-effect {
+    transition: transform 0.1s ease;
+}
+
+.touch-effect:active {
+    transform: scale(0.95);
+}
+
+/* Mobile Responsive for Child Tabs */
+@media (max-width: 767px) {
+    .child-tabs-header {
+        padding: 12px 16px 6px;
+    }
+    
+    .child-tabs {
+        padding: 6px 0 12px;
+    }
+    
+    .child-tab {
+        min-width: 120px;
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .child-avatar {
+        width: 28px;
+        height: 28px;
+        margin-right: 8px;
+    }
+    
+    .child-class {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .child-tab {
+        min-width: 100px;
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+    
+    .child-avatar {
+        width: 24px;
+        height: 24px;
+        margin-right: 6px;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -102,26 +258,38 @@ defined('BASEPATH') or exit('No direct script access allowed');
     </div>
     
     <div class="md3-container">
-        <?php
-        // --- CHILD SELECTION LOGIC FOR PARENT ROLE (from controller) ---
-        if (isset($children) && is_array($children) && count($children) > 0) {
-            echo '<div style="margin-bottom:20px;">';
-            echo '<div class="btn-group" role="group">';
-            foreach ($children as $child) {
-                $active = (isset($selected_child_id) && $selected_child_id == $child['id']) ? 'btn-primary' : 'btn-default';
-                $url = base_url('parents/select_child/' . $child['id']);
-                echo '<a href="' . $url . '" class="btn ' . $active . '" style="margin-right:5px;">';
-                echo '<img src="' . base_url('uploads/app_image/' . $child['photo']) . '" style="width:32px;height:32px;border-radius:50%;margin-right:6px;vertical-align:middle;">';
-                echo htmlspecialchars($child['fullname']) . ' <span style="font-size:12px;color:#888;">(' . $child['class_name'] . ' - ' . $child['section_name'] . ')</span>';
-                echo '</a>';
-            }
-            echo '</div>';
-            echo '</div>';
-            // If no child selected, default to first
-            if (!isset($selected_child_id) || !$selected_child_id) {
-                redirect(base_url('parents/select_child/' . $children[0]['id']));
-            }
-        }
+     <?php
+// --- CHILD SELECTION LOGIC FOR PARENT ROLE (updated with tabs) ---
+if (isset($children) && is_array($children) && count($children) > 0) {
+    echo '<div class="child-selection-container">';
+    echo '<div class="child-tabs-header">';
+    echo '<div class="child-tabs-title">' . translate('select_child') . '</div>';
+    echo '<div class="child-tabs-scroll">';
+    echo '<div class="child-tabs">';
+    
+    foreach ($children as $child) {
+        $active = (isset($selected_child_id) && $selected_child_id == $child['id']) ? 'active' : '';
+        $url = base_url('parents/select_child/' . $child['id']);
+        
+        echo '<a href="' . $url . '" class="child-tab ' . $active . ' touch-effect">';
+        echo '<img src="' . base_url('uploads/app_image/' . $child['photo']) . '" alt="' . htmlspecialchars($child['fullname']) . '" class="child-avatar">';
+        echo '<div class="child-info">';
+        echo '<span class="child-name">' . htmlspecialchars($child['fullname']) . '</span>';
+        echo '<span class="child-class">' . htmlspecialchars($child['class_name'] . ' - ' . $child['section_name']) . '</span>';
+        echo '</div>';
+        echo '</a>';
+    }
+    
+    echo '</div>'; // child-tabs
+    echo '</div>'; // child-tabs-scroll
+    echo '</div>'; // child-tabs-header
+    echo '</div>'; // child-selection-container
+    
+    // If no child selected, default to first
+    if (!isset($selected_child_id) || !$selected_child_id) {
+        redirect(base_url('parents/select_child/' . $children[0]['id']));
+    }
+}
         // Display all menu items in a single grid
         echo '<div class="md3-module-grid">';
         
