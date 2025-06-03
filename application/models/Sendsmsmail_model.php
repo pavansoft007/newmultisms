@@ -146,4 +146,31 @@ class Sendsmsmail_model extends CI_Model
         }
     }
 
+    public function sendWhatsApp($sendTo, $message, $name, $eMail = '') // eMail might not be needed but kept for consistency
+    {
+        $this->load->library('aisensy_whatsapp');
+        // Replace placeholders
+        $message = str_replace('{name}', $name, $message);
+        $message = str_replace('{email}', $eMail, $message); // If you use email in WA messages
+        $message = str_replace('{mobile_no}', $sendTo, $message);
+
+        // Example of sending a simple text message via Aisensy.
+        // You'll need to adjust this based on your Aisensy_whatsapp library's capabilities
+        // and whether you're sending template messages, interactive messages, etc.
+        // This might involve campaign IDs, template names, parameters for templates, etc.
+        // $templateName = 'your_template_name'; // If sending a template message
+        // $params = [$name, ...]; // Parameters for the template
+        // $response = $this->aisensy_whatsapp->send_template_message($sendTo, $templateName, $params);
+
+        // For a generic text message (if supported and configured for your Aisensy account):
+        // This is a hypothetical method name. Check your Aisensy_whatsapp.php library.
+        $response = $this->aisensy_whatsapp->send_text_message($sendTo, $message);
+
+        if ($response && isset($response['status']) && $response['status'] == 'success') { // Adjust based on actual response structure
+            return true;
+        } else {
+            // Log error if possible: log_message('error', 'Aisensy WhatsApp sending failed: ' . print_r($response, true));
+            return false;
+        }
+    }
 }
