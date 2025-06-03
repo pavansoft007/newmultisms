@@ -10,14 +10,20 @@ class Aisensy_whatsapp {
 
     public function __construct() {
         $this->CI =& get_instance();
-        $this->CI->load->config('aisensy');
+        $this->CI->load->model('provider_model'); // Load the new model
 
-        $this->api_key = $this->CI->config->item('aisensy_api_key');
-        $this->api_url = $this->CI->config->item('aisensy_api_url');
-        $this->user_name = $this->CI->config->item('aisensy_user_name');
+        // Fetch Aisensy provider details for WhatsApp
+        $provider = $this->CI->provider_model->get_active_provider_by_name('whatsapp', 'Aisensy');
 
-        if (empty($this->api_key) || empty($this->api_url) || empty($this->user_name)) {
-            log_message('error', 'AiSensy API Key, URL, or User Name is not configured.');
+        if ($provider && !empty($provider->api_key) && !empty($provider->api_url) && !empty($provider->username)) {
+            $this->api_key = $provider->api_key;
+            $this->api_url = $provider->api_url;
+            $this->user_name = $provider->username; // Assuming 'username' field in db stores this
+        } else {
+            $this->api_key = null;
+            $this->api_url = null;
+            $this->user_name = null;
+            log_message('error', 'AiSensy WhatsApp provider details not found, not active, or incomplete in the database.');
             // Optionally throw an exception or handle the error as appropriate
         }
     }
