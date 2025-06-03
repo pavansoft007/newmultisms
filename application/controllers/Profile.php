@@ -13,10 +13,15 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Profile extends Admin_Controller
 {
+    protected $data = array();
 
     public function __construct()
     {
         parent::__construct();
+        $this->load->library('form_validation');
+        $this->load->database();
+        $this->load->library('session');
+        $this->load->library('app_lib');
         $this->load->model('employee_model');
         $this->load->model('student_model');
         $this->load->model('fees_model');
@@ -24,6 +29,7 @@ class Profile extends Admin_Controller
         $this->load->model('profile_model');
         $this->load->model('email_model');
         $this->load->model('student_fields_model');
+        $this->data = array();
     }
 
     public function index()
