@@ -25,9 +25,10 @@
                                 <label class="control-label"><?php echo translate('campaign_type'); ?> <span class="required">*</span></label>
                                 <?php
                                     $arrayType = array(
-                                        '' => translate('select'), 
-                                        '1' => 'Sms', 
-                                        '2' => 'Email', 
+                                        '' => translate('select'),
+                                        'sms' => 'Sms',
+                                        'email' => 'Email',
+                                        'whatsapp' => 'WhatsApp',
                                     );;
                                     echo form_dropdown("campaign_type", $arrayType, set_value('campaign_type'), "class='form-control' required
                                     data-plugin-selectTwo data-width='100%' data-minimum-results-for-search='Infinity'");
@@ -75,14 +76,23 @@
                     <h4 class="panel-title"><i class="fas fa-list"></i> <?php echo translate('campaign') . " " . translate('reports'); ?></h4>
                 </header>
                 <div class="panel-body">
-                    <div class="export_title"><?=(set_value('campaign_type') == 1 ? 'Sms' : 'Email')?> Campaign Reports : <?=$startdate . " To " . $enddate ?> </div>
+                    <div class="export_title"><?php
+                                        $campaign_type_value = set_value('campaign_type');
+                                        if ($campaign_type_value == 'sms') {
+                                            echo 'Sms';
+                                        } elseif ($campaign_type_value == 'email') {
+                                            echo 'Email';
+                                        } elseif ($campaign_type_value == 'whatsapp') {
+                                            echo 'WhatsApp';
+                                        }
+                                    ?> Campaign Reports : <?=$startdate . " To " . $enddate ?> </div>
                     <div class="mb-sm mt-xs">
                         <table class="table table-bordered table-hover table-condensed table-export">
                             <thead>
                                 <tr>
                                     <th><?=translate('sl')?></th>
                                     <th><?=translate('campaign_name')?></th>
-                                <?php if (set_value('campaign_type') == 1): ?>
+                                <?php if (set_value('campaign_type') == 'sms'): ?>
                                     <th><?=translate('sms_gateway')?></th>
                                 <?php endif; ?>
                                     <th><?=translate('recipients_type')?></th>
@@ -97,7 +107,7 @@
                                 <tr>
                                     <td><?php echo $count++; ?></td>
                                     <td><?php echo $row['campaign_name']; ?></td>
-                                <?php if (set_value('campaign_type') == 1): ?>
+                                <?php if (set_value('campaign_type') == 'sms'): ?>
                                     <td><?php echo ucfirst($row['sms_gateway']); ?></td>
                                 <?php endif; ?>
                                     <td><?php

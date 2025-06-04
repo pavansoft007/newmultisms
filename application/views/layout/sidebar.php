@@ -1045,14 +1045,14 @@
                         </a>
                         <ul class="nav nav-children">
                             <?php if (get_permission('sendsmsmail', 'is_add')) {  ?>
-                            <li class="<?php if ($sub_page == 'sendsmsmail/sms' || $sub_page == 'sendsmsmail/email') echo 'nav-active';?>">
+                            <li class="<?php if ($sub_page == 'sendsmsmail/sms' || $sub_page == 'sendsmsmail/email' || $sub_page == 'sendsmsmail/whatsapp') echo 'nav-active';?>">
                                 <a href="<?=base_url('sendsmsmail/sms')?>">
-                                    <span><i class="fas fa-caret-right"></i><?=translate('send')?> Sms / Email</span>
+                                    <span><i class="fas fa-caret-right"></i><?=translate('send')?> Sms / Email / WhatsApp</span>
                                 </a>
                             </li>
-                            <li class="<?php if ($sub_page == 'sendsmsmail/campaign_reports') echo 'nav-active';?>">
+                            <li class="<?php if ($sub_page == 'sendsmsmail/campaign_reports' || $sub_page == 'sendsmsmail/whatsapp_campaign_reports') echo 'nav-active';?>">
                                 <a href="<?=base_url('sendsmsmail/campaign_reports')?>">
-                                    <span><i class="fas fa-caret-right"></i>Sms / Email <?=translate('report')?></span>
+                                    <span><i class="fas fa-caret-right"></i>Sms / Email / WhatsApp <?=translate('report')?></span>
                                 </a>
                             </li>
                             <?php } if (get_permission('sendsmsmail_template', 'is_view')) {  ?>
@@ -1064,6 +1064,12 @@
                             <li class="<?php if ($sub_page == 'sendsmsmail/template_email' || $sub_page == 'sendsmsmail/template_edit_email') echo 'nav-active';?>">
                                 <a href="<?=base_url('sendsmsmail/template/email')?>">
                                     <span><i class="fas fa-caret-right"></i> <?=translate('email') . " " . translate('template')?></span>
+                                </a>
+                            </li>
+                            <?php } if (get_permission('whatsapp_templates', 'is_view')) { // Assuming similar permission for whatsapp templates ?>
+                            <li class="<?php if ($sub_page == 'sendsmsmail/template_whatsapp' || $sub_page == 'sendsmsmail/template_edit_whatsapp') echo 'nav-active';?>">
+                                <a href="<?=base_url('sendsmsmail/template/whatsapp')?>">
+                                    <span><i class="fas fa-caret-right"></i> <?=translate('whatsapp') . " " . translate('template')?></span>
                                 </a>
                             </li>
                             <?php } ?>
