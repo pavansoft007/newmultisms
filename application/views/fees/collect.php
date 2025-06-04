@@ -8,20 +8,23 @@ if ($extINTL == true) {
     $spellout = new NumberFormatter("en", NumberFormatter::SPELLOUT);
 }
 
-// --- Pre-calculate total discount for the Invoice Summary table ---
+// --- Pre-calculate total discount and fine for the Invoice Summary table ---
 $_overall_invoice_summary_discount = 0;
+$_overall_invoice_summary_fine = 0;
 if (isset($basic['id'])) {
     $allocations_for_check = $this->fees_model->getInvoiceDetails($basic['id']);
     if (!empty($allocations_for_check)) {
         foreach ($allocations_for_check as $row_check) {
             $deposit_check = $this->fees_model->getStudentFeeDeposit($row_check['allocation_id'], $row_check['fee_type_id']);
             $_overall_invoice_summary_discount += isset($deposit_check['total_discount']) ? (float)$deposit_check['total_discount'] : 0;
+            $_overall_invoice_summary_fine += isset($deposit_check['total_fine']) ? (float)$deposit_check['total_fine'] : 0;
         }
     }
 }
 
-// --- Pre-calculate total discount for the Payment History table ---
+// --- Pre-calculate total discount and fine for the Payment History table ---
 $_overall_payment_history_discount = 0;
+$_overall_payment_history_fine = 0;
 if (isset($basic['id']) && $invoice['status'] != 'unpaid') {
     $allocations_for_history_check = $this->db->where(array('student_id' => $basic['id'], 'session_id' => get_session_id()))->get('fee_allocation')->result_array();
     if(!empty($allocations_for_history_check)) {
@@ -30,160 +33,213 @@ if (isset($basic['id']) && $invoice['status'] != 'unpaid') {
             if(!empty($historys_for_check)){
                 foreach ($historys_for_check as $row_hist_check) {
                     $_overall_payment_history_discount += isset($row_hist_check['discount']) ? (float)$row_hist_check['discount'] : 0;
+                    $_overall_payment_history_fine += isset($row_hist_check['fine']) ? (float)$row_hist_check['fine'] : 0;
                 }
             }
         }
     }
 }
 
-// Calculate colspan for invoice summary table (9 base columns: checkbox, #, type, due, status, amount, fine, paid, balance. +1 if discount shown)
-$invoice_table_base_colspan = 8; // #, type, due, status, amount, fine, paid, balance (visible on print)
-$invoice_table_full_colspan = 10; // checkbox, #, type, due, status, amount, discount (cond), fine, paid, balance
-$invoice_table_dynamic_colspan_header = $invoice_table_full_colspan - ($_overall_invoice_summary_discount > 0 ? 0 : 1);
-$invoice_table_dynamic_colspan_group = $invoice_table_full_colspan - 2 - ($_overall_invoice_summary_discount > 0 ? 0 : 1); // Checkbox and # are not part of group colspan
-
-// Calculate colspan for payment history table (10 base columns. +1 if discount shown)
-$history_table_base_colspan = 8; // type, code, date, remarks, method, amount, fine, paid (visible on print)
-$history_table_full_colspan = 11; // checkbox, type, code, date, collect_by, remarks, method, amount, discount (cond), fine, paid
-$history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_payment_history_discount > 0 ? 0 : 1);
-
 ?>
 <style>
     /* General Invoice Styling */
     #invoice_print .invoice,
     #payment_print .invoice.payment {
-        font-family: Arial, sans-serif; /* Or a font of your choice */
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Modern font stack for screen */
+        color: #333; 
     }
 
     /* Invoice Header Styling */
     #invoice_print .invoice header.clearfix,
     #payment_print .invoice.payment header.clearfix {
-        border: 1px solid #000; /* Solid border for the header */
+        border: 1px solid #dee2e6; 
         padding: 20px;
-        margin-bottom: 25px;
-        background-color: #f9f9f9; /* Light background for header */
+        margin-bottom: 30px; 
+        background-color: #f8f9fa; 
+        border-radius: 0.25rem; 
+    }
+
+    /* Header Row Flex Alignment */
+    #invoice_print .invoice header .row,
+    #payment_print .invoice.payment header .row {
+        display: flex;
+        align-items: center; 
+        justify-content: space-between; 
+    }
+
+    #invoice_print .invoice header .col-xs-4,
+    #payment_print .invoice.payment header .col-xs-4 {
+        padding-left: 10px; 
+        padding-right: 10px; 
+    }
+
+    /* Logo column */
+    #invoice_print .invoice header .col-xs-4:first-child,
+    #payment_print .invoice.payment header .col-xs-4:first-child {
+        flex: 0 0 auto; 
+        max-width: 25%; 
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+    }
+    #invoice_print .invoice header .ib,
+    #payment_print .invoice.payment header .ib {
+        display: inline-block; 
     }
 
     #invoice_print .invoice header .ib img,
     #payment_print .invoice.payment header .ib img {
-        max-height: 70px; /* Consistent logo height */
+        max-height: 60px; 
         width: auto;
-        vertical-align: middle;
+        display: block; 
     }
-
+    
     /* School Details Section in Header */
     #invoice_print .invoice header .school-details-column,
     #payment_print .invoice.payment header .school-details-column {
+        flex: 1 1 auto; 
         display: flex;
         flex-direction: column;
-        align-items: center; /* Center content horizontally */
-        justify-content: center; /* Center content vertically */
-        text-align: center; /* Ensure text is centered */
-        min-height: 70px; /* From original style */
-        padding: 0 10px; /* Add some padding */
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0 10px; 
+        overflow: hidden; 
     }
 
     #invoice_print .invoice header .school-details-column h3,
     #payment_print .invoice.payment header .school-details-column h3 {
-        color: #D90429; /* Strong, thick red */
-        font-weight: bold; /* Bold */
-        font-size: 1.6em; /* Slightly larger */
+        color: #007bff;
+        font-weight: 600;
+        font-size: 1.6em; 
         margin-top: 0;
-        margin-bottom: 8px; /* Space below name */
-        border-bottom: 2px solid #D90429; /* Red underline for "thick" feel */
-        padding-bottom: 5px;
-        display: inline-block; /* To make border-bottom only span the text width */
+        margin-bottom: 8px;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 6px;
+        display: inline-block; 
+        word-break: break-word; 
+        hyphens: auto; 
+        overflow-wrap: break-word; 
     }
 
     #invoice_print .invoice header .school-details-column p,
     #payment_print .invoice.payment header .school-details-column p {
-        margin-bottom: 4px; /* Tighter spacing for address lines */
-        line-height: 1.4;
-        font-size: 0.9em;
-        color: #333;
+        margin-bottom: 5px;
+        line-height: 1.5;
+        font-size: 0.95em; 
+        color: #555; 
     }
 
     /* Invoice Info Section in Header (Invoice No, Date, Status) */
     #invoice_print .invoice header .col-xs-4.text-right,
     #payment_print .invoice.payment header .col-xs-4.text-right {
+        flex: 0 0 auto; 
+        max-width: 25%; 
         display: flex;
         flex-direction: column;
-        align-items: flex-end; /* Align text to the right */
+        align-items: flex-end;
         justify-content: center;
-        min-height: 70px;
+        text-align: right;
+        padding-left: 10px; 
     }
      #invoice_print .invoice header .col-xs-4.text-right h4,
      #payment_print .invoice.payment header .col-xs-4.text-right h4 {
-        margin-top:0;
-        margin-bottom: 5px;
+         margin-top:0;
+         margin-bottom: 8px; 
+         font-size: 1.1em;
+         color: #333;
      }
      #invoice_print .invoice header .col-xs-4.text-right p,
      #payment_print .invoice.payment header .col-xs-4.text-right p {
-        margin-bottom: 3px;
+         margin-bottom: 5px; 
+         font-size: 0.95em;
+         color: #444;
      }
+
+    /* Bill Info Section */
+    .bill-info {
+        margin-top: 30px; 
+        margin-bottom: 30px; 
+    }
+    .bill-info .bill-data p.h5 {
+        font-size: 1.1em;
+        font-weight: 600; 
+        color: #007bff; 
+        margin-bottom: 10px;
+    }
+    .bill-info address {
+        font-size: 0.95em;
+        line-height: 1.6;
+        color: #555;
+    }
 
 
     /* Table Styling */
     .table-responsive > .table.invoice-items,
     .table-responsive > .table#paymentHistory {
-        border: 1px solid #333; /* Darker border for tables */
+        border: 1px solid #dee2e6; 
         width: 100%;
-        margin-top: 20px; /* Space above table */
-        margin-bottom: 1rem;
-        color: #212529;
-        border-collapse: collapse; /* Key for neat borders */
+        margin-top: 20px;
+        margin-bottom: 1.5rem; 
+        color: #333;
+        border-collapse: collapse;
+        font-size: 0.9em; 
     }
 
     .table-responsive > .table.invoice-items th,
     .table-responsive > .table.invoice-items td,
     .table-responsive > .table#paymentHistory th,
     .table-responsive > .table#paymentHistory td {
-        border: 1px solid #666; /* Medium gray border for cells */
-        padding: 0.65rem 0.75rem; /* Adjust padding */
-        vertical-align: middle; /* Better vertical alignment */
-        font-size: 0.9em;
+        border: 1px solid #e0e0e0; 
+        padding: 0.75rem 0.85rem; 
+        vertical-align: middle;
+        line-height: 1.5;
     }
 
     .table-responsive > .table.invoice-items thead th,
     .table-responsive > .table#paymentHistory thead th {
         vertical-align: middle;
-        border-bottom: 2px solid #333; /* Thicker border for header bottom */
-        background-color: #e9ecef; /* Light gray background for table headers */
-        font-weight: bold; /* Make header text bold */
-        color: #000;
+        border-bottom: 2px solid #007bff; 
+        background-color: #f1f3f5; 
+        font-weight: 600; 
+        color: #212529; 
+        font-size: 0.95em;
+        text-transform: uppercase; 
+        letter-spacing: 0.5px;
     }
 
     /* Style for group rows in Invoice Summary */
     .table.invoice-items td.group {
-        background-color: #f2f2f2; /* Lighter gray for group */
-        font-weight: bold;
-        border-top: 1px solid #666;
-        border-bottom: 1px solid #666;
-        padding: 0.75rem;
+        background-color: #e9ecef; 
+        font-weight: 600; 
+        color: #333;
+        border-top: 1px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
+        padding: 0.85rem;
     }
-    .table.invoice-items td.group img.group { /* Arrow image in group row */
-        margin-left: 8px;
-        height: 12px; /* Adjust size as needed */
+    .table.invoice-items td.group img.group {
+        margin-left: 10px;
+        height: 14px;
         vertical-align: middle;
     }
-
+    
     /* Status Labels Styling */
     .label.label-danger-custom,
     .label.label-info-custom,
     .label.label-success-custom {
-        padding: .3em .6em .3em;
-        font-size: 75%;
-        font-weight: 700;
+        padding: .4em .7em .4em; 
+        font-size: 80%; 
+        font-weight: 600; 
         line-height: 1;
         color: #fff;
         text-align: center;
         white-space: nowrap;
         vertical-align: baseline;
-        border-radius: .25em;
+        border-radius: .30em; 
     }
-    .label-danger-custom { background-color: #d9534f; }
-    .label-info-custom { background-color: #5bc0de; }
-    .label-success-custom { background-color: #5cb85c; }
+    .label-danger-custom { background-color: #dc3545; } 
+    .label-info-custom { background-color: #17a2b8; } 
+    .label-success-custom { background-color: #28a745; } 
 
 
     /* Print Specific Styles */
@@ -191,7 +247,9 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
         body {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
-            font-size: 10pt !important; /* Adjust base font size for print */
+            font-size: 10pt !important; /* Slightly increased base font size for print */
+            font-family: 'Times New Roman', Times, serif !important; /* Changed to serif font */
+            color: #000 !important;
         }
         .hidden-print {
             display: none !important;
@@ -205,69 +263,180 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
         }
         #invoice_print .invoice header.clearfix,
         #payment_print .invoice.payment header.clearfix {
-            border: 1px solid #000 !important;
-            background-color: #f9f9f9 !important; /* Keep light bg for header in print */
-            padding: 15px !important; /* Adjust padding for print if needed */
+            border: 1px solid #000 !important; /* Darker border for print header */
+            background-color: #fff !important; /* White background for print */
+            padding: 15px !important;
+            border-radius: 0 !important; 
+            position: relative !important; 
+            padding-bottom: 40px !important; 
+        }
+        
+        #invoice_print .invoice header .row > .col-xs-4:first-child,
+        #payment_print .invoice.payment header .row > .col-xs-4:first-child {
+            display: none !important; /* Hide screen logo container */
+        }
+        
+        /* Watermark Logo */
+        #invoice_print .invoice header .ib, /* This targets the div containing the img */
+        #payment_print .invoice.payment header .ib {
+            position: absolute !important;
+            top: 50% !important; 
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            z-index: 0 !important; 
+            opacity: 0.07 !important; /* Made slightly fainter */
+        }
+        #invoice_print .invoice header .ib img,
+        #payment_print .invoice.payment header .ib img {
+            max-height: 70px !important; 
+            width: auto !important;
+            object-fit: contain;
+        }
+
+        /* School Details Column */
+        #invoice_print .invoice header .school-details-column,
+        #payment_print .invoice.payment header .school-details-column {
+            flex: 1 1 100% !important; 
+            width: 100% !important;
+            text-align: center !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 5px !important;
+            position: relative !important; 
+            z-index: 1 !important;
+            min-height: 70px; 
         }
 
         #invoice_print .invoice header .school-details-column h3,
         #payment_print .invoice.payment header .school-details-column h3 {
-            color: #D90429 !important;
-            border-bottom-color: #D90429 !important;
+            color: #000 !important; 
+            font-size: 14pt !important; /* Increased for prominence */
+            font-weight: bold !important; 
+            word-break: break-word !important;
+            overflow-wrap: break-word !important; 
+            hyphens: auto !important;
+            line-height: 1.3 !important; 
+            margin-top: 0 !important;
+            margin-bottom: 6px !important; 
+            display: inline-block !important; /* Changed to inline-block */
+            text-align: center !important; 
+            border-bottom: 1px solid #000 !important; 
+            padding-bottom: 4px !important; 
+            max-width: 95%; /* Allow it to be wide but with slight padding from edges */
         }
          #invoice_print .invoice header .school-details-column p,
-         #payment_print .invoice.payment header .school-details-column p {
+        #payment_print .invoice.payment header .school-details-column p {
             color: #000 !important;
+            font-size: 9pt !important; 
+            line-height: 1.3 !important;
+            margin-bottom: 3px !important;
+            position: relative !important; 
+            z-index: 1 !important;
          }
+        
+        /* Invoice Info Column */
+        #invoice_print .invoice header .col-xs-4.text-right,
+        #payment_print .invoice.payment header .col-xs-4.text-right {
+            position: absolute !important;
+            bottom: 10px !important;
+            right: 15px !important;
+            width: auto !important; 
+            max-width: none !important; 
+            padding: 0 !important;
+            z-index: 1 !important; 
+            flex: none !important; 
+        }
+         #invoice_print .invoice header .col-xs-4.text-right h4,
+         #payment_print .invoice.payment header .col-xs-4.text-right h4 {
+             font-size: 10pt !important;
+             font-weight: bold;
+             color: #000 !important;
+             margin-bottom: 4px !important;
+         }
+         #invoice_print .invoice header .col-xs-4.text-right p,
+         #payment_print .invoice.payment header .col-xs-4.text-right p {
+             font-size: 9pt !important;
+             color: #000 !important;
+             margin-bottom: 2px !important;
+         }
+
+        .bill-info {
+            margin-top: 20px !important;
+            margin-bottom: 20px !important;
+        }
+        .bill-info address {
+            font-size: 10pt !important;
+            line-height: 1.4 !important;
+            color: #000 !important;
+        }
+         .bill-info .bill-data p.h5 {
+            font-size: 11pt !important;
+            font-weight: bold !important;
+            color: #000 !important;
+        }
 
 
         .table-responsive {
-            overflow-x: visible !important; /* Ensure table doesn't get cut off */
+            overflow-x: visible !important; 
         }
         .table-responsive > .table.invoice-items,
         .table-responsive > .table#paymentHistory {
-            border: 1px solid #000 !important;
-            font-size: 9pt !important; /* Slightly smaller font in tables for print */
+            border: 1px solid #000 !important; 
+            font-size: 9pt !important; 
+            margin-top: 15px !important;
+            margin-bottom: 15px !important;
         }
         .table-responsive > .table.invoice-items th,
         .table-responsive > .table.invoice-items td,
         .table-responsive > .table#paymentHistory th,
         .table-responsive > .table#paymentHistory td {
-            border: 1px solid #000 !important;
-            padding: 0.4rem 0.5rem !important; /* Tighter padding for print */
+            border: 1px solid #333 !important; 
+            padding: 5px 7px !important; 
             color: #000 !important;
+            vertical-align: middle !important;
         }
         .table-responsive > .table.invoice-items thead th,
         .table-responsive > .table#paymentHistory thead th {
-            background-color: #e9ecef !important;
-            border-bottom: 2px solid #000 !important;
+            background-color: #e0e0e0 !important; 
+            border-bottom: 2px solid #000 !important; 
             color: #000 !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important;
         }
         .table.invoice-items td.group {
-            background-color: #f2f2f2 !important;
+            background-color: #eaeaea !important; 
             color: #000 !important;
+            font-weight: bold !important;
         }
 
         .label.label-danger-custom,
         .label.label-info-custom,
         .label.label-success-custom {
-            /* Ensure labels print with background colors */
-            border: 1px solid #000; /* Add border to make them stand out more if color doesn't print well */
+            border: 1px solid #000;
+            color: #fff !important; 
+            background-clip: padding-box; /* Helps with rendering background colors in print */
         }
-        .label-danger-custom { background-color: #d9534f !important; color: #fff !important; }
-        .label-info-custom { background-color: #5bc0de !important; color: #fff !important; }
-        .label-success-custom { background-color: #5cb85c !important; color: #fff !important; }
+        .label-danger-custom { background-color: #dc3545 !important; }
+        .label-info-custom { background-color: #17a2b8 !important; }
+        .label-success-custom { background-color: #28a745 !important; }
+        
+        .invoice-summary.visible-print-block ul.amounts li {
+            font-size: 10pt !important;
+            margin-bottom: 4px !important;
+            color: #000 !important;
+        }
+        .invoice-summary.visible-print-block ul.amounts li strong {
+            font-weight: bold !important;
+        }
 
-
-        /* Hide unnecessary elements during print */
         .tabs-custom .nav-tabs, .panel > .tabs-custom > .nav-tabs,
         .text-right.mr-lg.hidden-print,
-        button, .btn, /* Hides all buttons */
+        button, .btn, 
         .mfp-hide,
-        .panel-footer, /* Hides form footers */
-        .invoice-summary.text-right.mt-lg.hidden-print, /* Hide screen summary */
-        .checkbox-replace, /* Hide checkboxes */
-        .hidden-print /* General catch-all */
+        .panel-footer, 
+        .invoice-summary.text-right.mt-lg.hidden-print, 
+        .checkbox-replace, 
+        .hidden-print 
          {
             display: none !important;
         }
@@ -278,8 +447,8 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
             width: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
+            background-color: #fff !important; /* Ensure invoice background is white for print */
         }
-        /* Ensure the print-specific summary sections are visible */
         #invDetailsPrint, #invPaymentHistory {
             display: block !important;
         }
@@ -303,7 +472,7 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
 <?php endif; ?>
 <?php if (get_permission('collect_fees', 'is_add') && $invoice['status'] != 'total'): ?>
             <li>
-                <a href="#fully_paid" data-toggle="tab"><i class="far fa-credit-card"></i> <?=translate('fully_paid') // Changed from "Fully Paid" to use translate for consistency ?></a>
+                <a href="#fully_paid" data-toggle="tab"><i class="far fa-credit-card"></i> <?=translate('fully_paid') ?></a>
             </li>
 <?php endif; ?>
         </ul>
@@ -313,17 +482,17 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                     <div class="invoice">
                         <header class="clearfix">
                             <div class="row">
-                                <div class="col-xs-4">
-                                    <div class="ib">
+                                <div class="col-xs-3"> <div class="ib">
                                         <img src="<?=$this->application_model->getBranchImage($basic['branch_id'], 'printing-logo')?>" alt="School Logo" onerror="this.onerror=null;this.src='https://placehold.co/150x70/cccccc/000000?text=Logo';" />
                                     </div>
                                 </div>
-                                <div class="col-xs-4 school-details-column"> <h3><?php echo htmlspecialchars($basic['school_name']); ?></h3>
+                            <div class="col-xs-6 school-details-column" style="font-size: 17px; line-height: 1; text-align: center; word-wrap: break-word; max-width: 100%; font-weight: 700; color: #FF0000;">
+                                    <?php echo htmlspecialchars($basic['school_name']); ?>
                                     <p><?php echo htmlspecialchars($basic['school_address']); ?></p>
                                     <p><?php echo htmlspecialchars($basic['school_mobileno']); ?></p>
                                     <p><?php echo htmlspecialchars($basic['school_email']); ?></p>
-                                </div>
-                                <div class="col-xs-4 text-right">
+                                </div>
+                                <div class="col-xs-3 text-right">
                                     <h4 class="mt-none mb-none text-dark">Invoice No #<?=htmlspecialchars($invoice['invoice_no'])?></h4>
                                     <p class="mb-none">
                                         <span class="text-dark"><?=translate('date')?> : </span>
@@ -331,7 +500,7 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                     </p>
                                     <p class="mb-none">
                                         <span class="text-dark"><?=translate('status')?> : </span><?php
-                                            $status_text = ''; // Renamed from $status to avoid conflict
+                                            $status_text = ''; 
                                             $labelmode = '';
                                             if($invoice['status'] == 'unpaid') {
                                                 $status_text = translate('unpaid');
@@ -364,12 +533,11 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                         </address>
                                     </div>
                                 </div>
-                                <div class="col-xs-4 text-right"> </div>
-                            </div>
+                                <div class="col-xs-4 text-right"> </div> </div>
                         </div>
                     <?php if (get_permission('collect_fees', 'is_add')) { ?>
                         <button type="button" class="btn btn-default btn-sm mb-sm hidden-print" id="collectFees" data-loading-text="<i class='fas fa-spinner fa-spin'></i> Processing">
-                            <i class="fas fa-coins fa-fw"></i> <?=translate('selected_fees_collect') // Changed from "Selected Fees Collect" ?>
+                            <i class="fas fa-coins fa-fw"></i> <?=translate('selected_fees_collect') ?>
                         </button>
                     <?php } ?>
                         <div class="table-responsive br-none">
@@ -388,10 +556,12 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                         <th class="text-weight-semibold"><?=translate("due_date")?></th>
                                         <th class="text-weight-semibold"><?=translate("status")?></th>
                                         <th class="text-weight-semibold"><?=translate("amount")?></th>
-                                        <?php if ($_overall_invoice_summary_discount > 0): ?>
+                                        <?php if ($_overall_invoice_summary_discount >= 1): ?>
                                         <th class="text-weight-semibold"><?=translate("discount")?></th>
                                         <?php endif; ?>
+                                        <?php if ($_overall_invoice_summary_fine >= 1): ?>
                                         <th class="text-weight-semibold"><?=translate("fine")?></th>
+                                        <?php endif; ?>
                                         <th class="text-weight-semibold"><?=translate("paid")?></th>
                                         <th class="text-center text-weight-semibold"><?=translate("balance")?></th>
                                     </tr>
@@ -401,46 +571,44 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                         $group = array();
                                         $count = 1;
                                         $total_fine = 0;
-                                        $fully_total_fine = 0; // Used for "fully_paid" tab, ensure calculation is correct
-                                        $total_discount = 0; // For summary section
-                                        $total_paid = 0;     // For summary section
-                                        $total_balance = 0;  // For summary section
-                                        $total_amount = 0;   // For summary section (gross amount)
+                                        $fully_total_fine = 0; 
+                                        $total_discount = 0; 
+                                        $total_paid = 0;     
+                                        $total_balance = 0;  
+                                        $total_amount = 0;   
                                         $typeData = array('' => translate('select'));
-                                        $allocations = $this->fees_model->getInvoiceDetails($basic['id']);
                                         
-                                        if (!empty($allocations)) {
-                                            foreach ($allocations as $row) {
+                                        if (!empty($allocations_for_check)) {
+                                            foreach ($allocations_for_check as $row) { 
                                                 $deposit = $this->fees_model->getStudentFeeDeposit($row['allocation_id'], $row['fee_type_id']);
                                                 $item_base_amount = isset($row['amount']) ? (float)$row['amount'] : 0;
                                                 $type_discount = isset($deposit['total_discount']) ? (float)$deposit['total_discount'] : 0;
                                                 $type_fine = isset($deposit['total_fine']) ? (float)$deposit['total_fine'] : 0;
-                                                $type_amount = isset($deposit['total_amount']) ? (float)$deposit['total_amount'] : 0; // Amount paid for this item
+                                                $type_amount = isset($deposit['total_amount']) ? (float)$deposit['total_amount'] : 0; 
                                                 
                                                 $balance = $item_base_amount - ($type_amount + $type_discount);
 
                                                 $total_discount += $type_discount;
-                                                $total_fine += $type_fine;
+                                                $total_fine += $type_fine; 
                                                 $total_paid += $type_amount;
                                                 $total_balance += $balance;
                                                 $total_amount += $item_base_amount;
 
-                                                if ($balance != 0) { // Or a more robust float comparison
+                                                if (abs($balance) > 0.001) { 
                                                     $typeData[$row['allocation_id'] . "|" . $row['fee_type_id']] = $row['name'];
-                                                    // This fine calculation seems specific for the "fully_paid" tab logic
                                                     $fine_calc = $this->fees_model->feeFineCalculation($row['allocation_id'], $row['fee_type_id']);
-                                                    $b_fine_info = $this->fees_model->getBalance($row['allocation_id'], $row['fee_type_id']); // Renamed $b to avoid conflict
+                                                    $b_fine_info = $this->fees_model->getBalance($row['allocation_id'], $row['fee_type_id']); 
                                                     $fine_for_fully_paid = abs($fine_calc - (isset($b_fine_info['fine']) ? (float)$b_fine_info['fine'] : 0));
                                                     $fully_total_fine += $fine_for_fully_paid;
                                                 }
                                         ?>
                                     <?php if(!in_array($row['group_id'], $group)) { 
                                         $group[] = $row['group_id'];
-                                        // Dynamic colspan for group header row
-                                        $group_header_colspan = 8 + ($_overall_invoice_summary_discount > 0 ? 1 : 0); // type, due, status, amount, [discount], fine, paid, balance
+                                        $group_header_colspan = 6 + ($_overall_invoice_summary_discount >= 1 ? 1 : 0) + ($_overall_invoice_summary_fine >= 1 ? 1 : 0);
                                         ?>
                                     <tr>
-                                        <td class="group hidden-print" colspan="2">&nbsp;</td> <td class="group" colspan="<?=$group_header_colspan?>"><strong><?php echo htmlspecialchars(get_type_name_by_id('fee_groups', $row['group_id'])); ?></strong><img class="group" src="<?php echo base_url('assets/images/arrow.png'); ?>" alt="arrow"></td>
+                                        <td class="group hidden-print" colspan="2">&nbsp;</td>
+                                        <td class="group" colspan="<?=$group_header_colspan?>"><strong><?php echo htmlspecialchars(get_type_name_by_id('fee_groups', $row['group_id'])); ?></strong><img class="group" src="<?php echo base_url('assets/images/arrow.png'); ?>" alt="arrow"></td>
                                     </tr>
                                     <?php } ?>
                                     <tr>
@@ -457,36 +625,38 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                             $item_labelmode = '';
                                             $effective_due = $item_base_amount - $type_discount;
 
-                                            if($type_amount <= 0 && $effective_due > 0) {
+                                            if($type_amount <= 0 && $effective_due > 0.001) { 
                                                 $item_status_text = translate('unpaid');
                                                 $item_labelmode = 'label-danger-custom';
-                                            } elseif($type_amount >= $effective_due && $effective_due > 0) {
+                                            } elseif($type_amount >= $effective_due && $effective_due > 0.001) {
                                                 $item_status_text = translate('total_paid');
                                                 $item_labelmode = 'label-success-custom';
                                             } elseif ($type_amount > 0 && $type_amount < $effective_due) {
                                                 $item_status_text = translate('partly_paid');
                                                 $item_labelmode = 'label-info-custom';
-                                            } elseif ($effective_due <= 0) { // If amount after discount is zero or less, consider paid
-                                                 $item_status_text = translate('total_paid');
-                                                 $item_labelmode = 'label-success-custom';
-                                            } else { // Default fallback, should ideally not be reached with above logic
-                                                 $item_status_text = translate('unpaid');
-                                                 $item_labelmode = 'label-danger-custom';
+                                            } elseif ($effective_due <= 0.001) { 
+                                                $item_status_text = translate('total_paid');
+                                                $item_labelmode = 'label-success-custom';
+                                            } else { 
+                                                $item_status_text = translate('unpaid'); 
+                                                $item_labelmode = 'label-danger-custom';
                                             }
                                             echo "<span class='label ".htmlspecialchars($item_labelmode)." '>".htmlspecialchars($item_status_text)."</span>";
                                         ?></td>
                                         <td><?php echo $currency_symbol . number_format($item_base_amount, 2, '.', '');?></td>
-                                        <?php if ($_overall_invoice_summary_discount > 0): ?>
+                                        <?php if ($_overall_invoice_summary_discount >= 1): ?>
                                         <td><?php echo $currency_symbol . number_format($type_discount, 2, '.', '');?></td>
                                         <?php endif; ?>
+                                        <?php if ($_overall_invoice_summary_fine >= 1): ?>
                                         <td><?php echo $currency_symbol . number_format($type_fine, 2, '.', '');?></td>
+                                        <?php endif; ?>
                                         <td><?php echo $currency_symbol . number_format($type_amount, 2, '.', '');?></td>
                                         <td class="text-center"><?php echo $currency_symbol . number_format($balance + $type_fine, 2, '.', '');?></td>
                                     </tr>
                                     <?php 
-                                        } // end foreach $allocations
+                                        } 
                                     } else {
-                                        $no_fees_colspan = 9 + ($_overall_invoice_summary_discount > 0 ? 1 : 0); // Checkbox, #, type, due, status, amount, [discount], fine, paid, balance
+                                        $no_fees_colspan = 8 + ($_overall_invoice_summary_discount >= 1 ? 1 : 0) + ($_overall_invoice_summary_fine >= 1 ? 1 : 0);
                                         echo '<tr><td colspan="' . $no_fees_colspan . '" class="text-center">' . translate('no_fees_found') . '</td></tr>';
                                     }
                                     ?>
@@ -498,17 +668,17 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                 <div class="col-md-5 col-xs-12 pull-right">
                                     <ul class="amounts" style="list-style-type: none; padding-left: 0;">
                                         <li><strong><?=translate('grand_total')?> :</strong> <?=$currency_symbol . number_format($total_amount, 2, '.', ''); ?></li>
-                                        <?php if ($total_discount > 0): // Show discount in summary if it exists ?>
+                                        <?php if ($total_discount >= 1): ?>
                                         <li><strong><?=translate('discount')?> :</strong> <?=$currency_symbol . number_format($total_discount, 2, '.', ''); ?></li>
                                         <?php endif; ?>
                                         <li><strong><?=translate('paid')?> :</strong> <?=$currency_symbol . number_format($total_paid, 2, '.', ''); ?></li>
-                                        <?php if ($total_fine > 0): // Show fine in summary if it exists ?>
+                                        <?php if ($total_fine >= 1):  ?>
                                         <li><strong><?=translate('fine')?> :</strong> <?=$currency_symbol . number_format($total_fine, 2, '.', ''); ?></li>
                                         <?php endif; ?>
                                         
                                         <?php
-                                            $summary_total_paid_with_fine = $total_paid + $total_fine;
                                             $summary_final_balance = ($total_amount - $total_discount) + $total_fine - $total_paid;
+                                            $summary_total_paid_with_fine = $total_paid + $total_fine;
                                         ?>
                                         <li><strong><?=translate('total_paid')?> (<?=translate('with_fine')?>) :</strong> <?=$currency_symbol . number_format($summary_total_paid_with_fine, 2, '.', ''); ?></li>
 
@@ -517,7 +687,7 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                             <?php
                                             $summary_final_balance_formatted = number_format($summary_final_balance, 2, '.', '');
                                             $numberSPELL = "";
-                                            if ($extINTL == true && $summary_final_balance != 0) { // Check if $spellout is initialized
+                                            if ($extINTL == true && abs($summary_final_balance) >= 0.01) { 
                                                 $numberSPELL = ' </br>( ' . ucwords($spellout->format(abs($summary_final_balance))) . ' )';
                                             }
                                             echo $currency_symbol . $summary_final_balance_formatted . $numberSPELL;
@@ -527,7 +697,7 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                 </div>
                             </div>
                         </div>
-                        <div class="invoice-summary text-right mt-lg visible-print-block" id="invDetailsPrint"></div>
+                        <div class="invoice-summary text-right mt-lg visible-print-block" id="invDetailsPrint"></div> 
                     </div>
                     <div class="text-right mr-lg hidden-print">
                         <button id="invoicePrint" class="btn btn-default ml-sm" data-loading-text="<i class='fas fa-spinner fa-spin'></i> Processing"><i class="fas fa-print"></i> <?=translate('print')?></button>
@@ -540,18 +710,20 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                 <div id="payment_print">
                     <div class="invoice payment">
                         <header class="clearfix">
-                            <div class="row">
-                                <div class="col-xs-4">
+                             <div class="row">
+                                <div class="col-xs-3"> 
                                     <div class="ib">
                                         <img src="<?=$this->application_model->getBranchImage($basic['branch_id'], 'printing-logo')?>" alt="School Logo" onerror="this.onerror=null;this.src='https://placehold.co/150x70/cccccc/000000?text=Logo';" />
                                     </div>
                                 </div>
-                                <div class="col-xs-4 school-details-column"> <h3><?php echo htmlspecialchars($basic['school_name']); ?></h3>
-                                     <p><?php echo htmlspecialchars($basic['school_address']); ?></p>
-                                     <p><?php echo htmlspecialchars($basic['school_mobileno']); ?></p>
-                                     <p><?php echo htmlspecialchars($basic['school_email']); ?></p>
-                                </div>
-                                <div class="col-xs-4 text-right">
+                           
+                             <div class="col-xs-6 school-details-column" style="font-size: 17px; line-height: 1; text-align: center; word-wrap: break-word; max-width: 100%; font-weight: 700; color: #FF0000;">
+                                    <?php echo htmlspecialchars($basic['school_name']); ?>
+                                    <p><?php echo htmlspecialchars($basic['school_address']); ?></p>
+                                    <p><?php echo htmlspecialchars($basic['school_mobileno']); ?></p>
+                                    <p><?php echo htmlspecialchars($basic['school_email']); ?></p>
+                                </div>
+                                <div class="col-xs-3 text-right">
                                     <h4 class="mt-none mb-none text-dark">Invoice No #<?php echo htmlspecialchars($invoice['invoice_no']); ?></h4>
                                     <p class="mb-none">
                                         <span class="text-dark"><?=translate('date')?> : </span>
@@ -560,8 +732,8 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                     <p class="mb-none">
                                         <span class="text-dark"><?=translate('status')?> : </span>
                                         <?php
-                                            $history_status_text = ''; // Renamed from $status
-                                            $history_labelmode = '';   // Renamed from $labelmode
+                                            $history_status_text = ''; 
+                                            $history_labelmode = '';   
                                             if($invoice['status'] == 'unpaid') {
                                                 $history_status_text = translate('unpaid');
                                                 $history_labelmode = 'label-danger-custom';
@@ -593,13 +765,11 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                         </address>
                                     </div>
                                 </div>
-                                <div class="col-xs-6"> <div class="bill-data text-right">
+                                <!-- <div class="col-xs-6"> 
+                                    <div class="bill-data text-right"> 
                                         <p class="h5 mb-xs text-dark text-weight-semibold">Academic :</p>
                                         <address style="font-style: normal;">
                                             <?php 
-                                            // This seems to repeat school info, which is already in the header.
-                                            // If this is intended for a different set of details, adjust accordingly.
-                                            // For now, assuming it's a repetition and might be simplified or removed if redundant.
                                             echo htmlspecialchars($basic['school_name']) . "<br/>";
                                             echo htmlspecialchars($basic['school_address']) . "<br/>";
                                             echo htmlspecialchars($basic['school_mobileno']) . "<br/>";
@@ -607,7 +777,7 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                             ?>
                                         </address>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     <?php if (get_permission('fees_revert', 'is_delete')): ?>
@@ -617,91 +787,93 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                     <?php endif; ?>
                         <div class="table-responsive">
                             <table class="table invoice-items" id="paymentHistory"> <thead>
-                                    <tr class="h5 text-dark">
-                                        <th class="text-weight-semibold hidden-print">
-                                            <div class="checkbox-replace" >
-                                                <label class="i-checks" data-toggle="tooltip" data-original-title="Print Show / Hidden">
-                                                    <input type="checkbox" class="fee-selectAll" checked> <i></i>
-                                                </label>
-                                            </div>
-                                        </th>
-                                        <th class="text-weight-semibold"><?=translate('fees_type')?></th>
-                                        <th class="text-weight-semibold"><?=translate('fees_code')?></th>
-                                        <th class="text-weight-semibold"><?=translate('date')?></th>
-                                        <th class="text-weight-semibold hidden-print"><?=translate('collect_by')?></th>
-                                        <th class="text-weight-semibold"><?=translate('remarks')?></th>
-                                        <th class="text-weight-semibold"><?=translate('method')?></th>
-                                        <th class="text-weight-semibold"><?=translate('amount')?></th>
-                                        <?php if ($_overall_payment_history_discount > 0): ?>
-                                        <th class="text-weight-semibold"><?=translate('discount')?></th>
-                                        <?php endif; ?>
-                                        <th class="text-weight-semibold"><?=translate('fine')?></th>
-                                        <th class="text-weight-semibold"><?=translate('paid')?></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    $history_total_amount = 0;
-                                    $history_total_discount = 0;
-                                    $history_total_fine = 0;
-                                    $history_total_paid = 0;
-                                    $found_history = false;
+                                <tr class="h5 text-dark">
+                                    <th class="text-weight-semibold hidden-print">
+                                        <div class="checkbox-replace" >
+                                            <label class="i-checks" data-toggle="tooltip" data-original-title="Print Show / Hidden">
+                                                <input type="checkbox" class="fee-selectAll" checked> <i></i>
+                                            </label>
+                                        </div>
+                                    </th>
+                                    <th class="text-weight-semibold"><?=translate('fees_type')?></th>
+                                    <th class="text-weight-semibold"><?=translate('fees_code')?></th>
+                                    <th class="text-weight-semibold"><?=translate('date')?></th>
+                                    <th class="text-weight-semibold hidden-print"><?=translate('collect_by')?></th>
+                                    <th class="text-weight-semibold"><?=translate('remarks')?></th>
+                                    <th class="text-weight-semibold"><?=translate('method')?></th>
+                                    <th class="text-weight-semibold"><?=translate('amount')?></th>
+                                    <?php if ($_overall_payment_history_discount >= 1): ?>
+                                    <th class="text-weight-semibold"><?=translate('discount')?></th>
+                                    <?php endif; ?>
+                                    <?php if ($_overall_payment_history_fine >= 1): ?>
+                                    <th class="text-weight-semibold"><?=translate('fine')?></th>
+                                    <?php endif; ?>
+                                    <th class="text-weight-semibold"><?=translate('paid')?></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $history_total_amount = 0; 
+                                $history_total_discount = 0; 
+                                $history_total_fine = 0; 
+                                $history_total_paid = 0; 
+                                $found_history = false;
 
-                                    $allocations_hist = $this->db->where(array('student_id' => $basic['id'], 'session_id' => get_session_id()))->get('fee_allocation')->result_array();
-                                    if(!empty($allocations_hist)) {
-                                        foreach ($allocations_hist as $allRow) {
-                                            $historys = $this->fees_model->getPaymentHistory($allRow['id'], $allRow['group_id']);
-                                            if(!empty($historys)){
-                                                $found_history = true;
-                                                foreach ($historys as $row) {
-                                                    $history_payment_amount = isset($row['amount']) ? (float)$row['amount'] : 0;
-                                                    $history_payment_discount = isset($row['discount']) ? (float)$row['discount'] : 0;
-                                                    $history_payment_fine = isset($row['fine']) ? (float)$row['fine'] : 0;
-                                                    
-                                                    // Accumulate totals for summary
-                                                    $history_total_amount += ($history_payment_amount + $history_payment_discount); // Original amount before discount
-                                                    $history_total_discount += $history_payment_discount;
-                                                    $history_total_fine += $history_payment_fine;
-                                                    $history_total_paid += $history_payment_amount; // 'amount' here is the net paid amount for this transaction
-                                    ?>
-                                    <tr>
-                                        <td class="hidden-print checked-area">
-                                            <div class="checkbox-replace">
-                                                <label class="i-checks"><input type="checkbox" name="cb_feePay" value="<?php echo htmlspecialchars($row['id']); ?>" checked><i></i></label>
-                                            </div>
-                                        </td>
-                                        <td class="text-weight-semibold text-dark"><?php echo htmlspecialchars($row['name']); ?></td>
-                                        <td><?php echo htmlspecialchars($row['fee_code']); ?></td>
-                                        <td><?php echo _d($row['date']); ?></td>
-                                        <td class="hidden-print">
-                                            <?php
-                                                if ($row['collect_by'] == 'online') {
-                                                    echo translate('online');
-                                                } else {
-                                                    echo htmlspecialchars(get_type_name_by_id('staff', $row['collect_by']));
-                                                }
-                                            ?>
-                                        </td>
-                                        <td><?php echo htmlspecialchars($row['remarks']); ?></td>
-                                        <td><?php echo htmlspecialchars($row['payvia']); ?></td>
-                                        <td><?php echo $currency_symbol . number_format(($history_payment_amount + $history_payment_discount), 2, '.', ''); // Gross amount for this transaction ?></td>
-                                        <?php if ($_overall_payment_history_discount > 0): ?>
-                                        <td><?php echo $currency_symbol . number_format($history_payment_discount, 2, '.', ''); ?></td>
-                                        <?php endif; ?>
-                                        <td><?php echo $currency_symbol . number_format($history_payment_fine, 2, '.', ''); ?></td>
-                                        <td><?php echo $currency_symbol . number_format($history_payment_amount, 2, '.', ''); // Net paid amount ?></td>
-                                    </tr>
-                                    <?php       } // end foreach $historys
-                                            } // end if !empty $historys
-                                        } // end foreach $allocations_hist
-                                    } // end if !empty $allocations_hist
-                                    
-                                    if (!$found_history) {
-                                        $no_history_colspan = 10 + ($_overall_payment_history_discount > 0 ? 1 : 0);
-                                        echo '<tr><td colspan="' . $no_history_colspan . '" class="text-center">' . translate('no_payment_history_found') . '</td></tr>';
-                                    }
-                                    ?>
-                                </tbody>
+                                if(!empty($allocations_for_history_check)) {
+                                    foreach ($allocations_for_history_check as $allRow) {
+                                        $historys = $this->fees_model->getPaymentHistory($allRow['id'], $allRow['group_id']);
+                                        if(!empty($historys)){
+                                            $found_history = true;
+                                            foreach ($historys as $row) {
+                                                $history_payment_amount = isset($row['amount']) ? (float)$row['amount'] : 0; 
+                                                $history_payment_discount = isset($row['discount']) ? (float)$row['discount'] : 0;
+                                                $history_payment_fine = isset($row['fine']) ? (float)$row['fine'] : 0;
+                                                
+                                                $history_total_amount += ($history_payment_amount + $history_payment_discount); 
+                                                $history_total_discount += $history_payment_discount;
+                                                $history_total_fine += $history_payment_fine;
+                                                $history_total_paid += $history_payment_amount; 
+                                ?>
+                                <tr>
+                                    <td class="hidden-print checked-area">
+                                        <div class="checkbox-replace">
+                                            <label class="i-checks"><input type="checkbox" name="cb_feePay" value="<?php echo htmlspecialchars($row['id']); ?>" checked><i></i></label>
+                                        </div>
+                                    </td>
+                                    <td class="text-weight-semibold text-dark"><?php echo htmlspecialchars($row['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['fee_code']); ?></td>
+                                    <td><?php echo _d($row['date']); ?></td>
+                                    <td class="hidden-print">
+                                        <?php
+                                            if ($row['collect_by'] == 'online') {
+                                                echo translate('online');
+                                            } else {
+                                                echo htmlspecialchars(get_type_name_by_id('staff', $row['collect_by']));
+                                            }
+                                        ?>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($row['remarks']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['payvia']); ?></td>
+                                    <td><?php echo $currency_symbol . number_format(($history_payment_amount + $history_payment_discount), 2, '.', ''); ?></td>
+                                    <?php if ($_overall_payment_history_discount >= 1): ?>
+                                    <td><?php echo $currency_symbol . number_format($history_payment_discount, 2, '.', ''); ?></td>
+                                    <?php endif; ?>
+                                    <?php if ($_overall_payment_history_fine >= 1): ?>
+                                    <td><?php echo $currency_symbol . number_format($history_payment_fine, 2, '.', ''); ?></td>
+                                    <?php endif; ?>
+                                    <td><?php echo $currency_symbol . number_format($history_payment_amount, 2, '.', ''); ?></td>
+                                </tr>
+                                <?php           } 
+                                        } 
+                                    } 
+                                } 
+                                
+                                if (!$found_history) {
+                                    $no_history_colspan = 9 + ($_overall_payment_history_discount >= 1 ? 1 : 0) + ($_overall_payment_history_fine >= 1 ? 1 : 0);
+                                    echo '<tr><td colspan="' . $no_history_colspan . '" class="text-center">' . translate('no_payment_history_found') . '</td></tr>';
+                                }
+                                ?>
+                            </tbody>
                             </table>
                         </div>
                         <?php if ($found_history): ?>
@@ -709,12 +881,12 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                             <div class="row">
                                 <div class="col-md-5 col-xs-12 pull-right">
                                     <ul class="amounts" style="list-style-type: none; padding-left: 0;">
-                                        <li><strong><?=translate('sub_total')?> :</strong> <?=$currency_symbol . number_format($history_total_amount, 2, '.', ''); // This is sum of (paid + discount) per transaction ?></li>
-                                        <?php if ($history_total_discount > 0): ?>
+                                        <li><strong><?=translate('sub_total')?> :</strong> <?=$currency_symbol . number_format($history_total_amount, 2, '.', ''); ?></li>
+                                        <?php if ($history_total_discount >= 1): ?>
                                         <li><strong><?=translate('discount')?> :</strong> <?=$currency_symbol . number_format($history_total_discount, 2, '.', ''); ?></li>
                                         <?php endif; ?>
-                                        <li><strong><?=translate('paid')?> :</strong> <?=$currency_symbol . number_format($history_total_paid, 2, '.', ''); // Sum of net paid amounts ?></li>
-                                        <?php if ($history_total_fine > 0): ?>
+                                        <li><strong><?=translate('paid')?> :</strong> <?=$currency_symbol . number_format($history_total_paid, 2, '.', ''); ?></li>
+                                        <?php if ($history_total_fine >= 1): ?>
                                         <li><strong><?=translate('fine')?> :</strong> <?=$currency_symbol . number_format($history_total_fine, 2, '.', ''); ?></li>
                                         <?php endif; ?>
                                         <li>
@@ -723,7 +895,7 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                             $numberSPELL = "";
                                             $grand_paid_history = $history_total_paid + $history_total_fine;
                                             $grand_paid_history_formatted = number_format($grand_paid_history, 2, '.', '');
-                                            if ($extINTL == true && $grand_paid_history != 0) { // Check if $spellout is initialized
+                                            if ($extINTL == true && abs($grand_paid_history) >= 0.01) { 
                                                 $numberSPELL = ' </br>( ' . ucwords($spellout->format(abs($grand_paid_history))) . ' )';
                                             }
                                             echo $currency_symbol . $grand_paid_history_formatted . $numberSPELL;
@@ -733,7 +905,7 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                 </div>
                             </div>
                         </div>
-                        <div class="invoice-summary text-right mt-lg visible-print-block" id="invPaymentHistory"></div>
+                        <div class="invoice-summary text-right mt-lg visible-print-block" id="invPaymentHistory"></div> 
                         <?php endif; ?>
                     </div>
                     <div class="text-right mr-lg hidden-print">
@@ -743,7 +915,7 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
             </div>
             <?php endif; ?>
             
-            <?php if($invoice['status'] != 'total' && get_permission('collect_fees', 'is_add')): // Combined condition ?>
+            <?php if($invoice['status'] != 'total' && get_permission('collect_fees', 'is_add')): ?>
                 <div id="collect_fees" class="tab-pane">
                     <?php echo form_open('fees/fee_add', array('class' => 'form-horizontal frm-submit' )); ?>
                         <div class="form-group">
@@ -816,7 +988,7 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                 <textarea name="remarks" rows="2" class="form-control" placeholder="<?=translate('write_your_remarks')?>"></textarea>
                                 <div class="checkbox-replace mt-lg">
                                     <label class="i-checks">
-                                        <input type="checkbox" name="guardian_sms" checked> <i></i> <?=translate('guardian_confirmation_sms') // Changed for translation consistency ?>
+                                        <input type="checkbox" name="guardian_sms" checked> <i></i> <?=translate('guardian_confirmation_sms') ?>
                                     </label>
                                 </div>
                             </div>
@@ -835,7 +1007,7 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                     <?php echo form_close();?>
                 </div>
             <?php endif; ?>
-            <?php if($invoice['status'] != 'total' && get_permission('collect_fees', 'is_add')): // Combined condition ?>
+            <?php if($invoice['status'] != 'total' && get_permission('collect_fees', 'is_add')): ?>
                 <div id="fully_paid" class="tab-pane">
                     <?php echo form_open('fees/fee_fully_paid', array('class' => 'form-horizontal frm-submit' )); ?>
                         <div class="form-group">
@@ -864,7 +1036,7 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                             <label class="col-md-3 control-label"><?=translate('payment_method')?> <span class="required">*</span></label>
                             <div class="col-md-6">
                                 <?php
-                                    $payvia_list_fully = $this->app_lib->getSelectList('payment_types'); // Use different var name if needed
+                                    $payvia_list_fully = $this->app_lib->getSelectList('payment_types'); 
                                     echo form_dropdown("pay_via", $payvia_list_fully, set_value('pay_via'), "class='form-control' data-plugin-selectTwo data-width='100%'
                                     data-minimum-results-for-search='Infinity' ");
                                 ?>
@@ -872,15 +1044,15 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                             </div>
                         </div>
                         <?php
-                        $links_fully = $this->fees_model->get('transactions_links', array('branch_id' => $basic['branch_id']), true); // Use different var name
+                        $links_fully = $this->fees_model->get('transactions_links', array('branch_id' => $basic['branch_id']), true); 
                         if ($links_fully['status'] == 1) {
                         ?>
                             <div class="form-group">
                                 <label class="col-md-3 control-label"><?php echo translate('account'); ?> <span class="required">*</span></label>
                                 <div class="col-md-6">
                                 <?php
-                                    $accounts_list_fully = $this->app_lib->getSelectByBranch('accounts', $basic['branch_id']); // Use different var name
-                                    echo form_dropdown("account_id", $accounts_list_fully, $links_fully['deposit'], "class='form-control' id='account_id_fully' required data-plugin-selectTwo data-width='100%'"); // Different ID if needed
+                                    $accounts_list_fully = $this->app_lib->getSelectByBranch('accounts', $basic['branch_id']); 
+                                    echo form_dropdown("account_id", $accounts_list_fully, $links_fully['deposit'], "class='form-control' id='account_id_fully' required data-plugin-selectTwo data-width='100%'"); 
                                 ?>
                                 </div>
                             </div>
@@ -896,7 +1068,7 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                 </div>
                             </div>
                         </div>
-                        <input type="hidden" name="invoice_id" value="<?php echo htmlspecialchars($basic['id']); // This is student_id in other forms, ensure it's correct for fee_fully_paid context ?>">
+                        <input type="hidden" name="invoice_id" value="<?php echo htmlspecialchars($invoice['id']); ?>">
                         <input type="hidden" name="branch_id" value="<?=htmlspecialchars($basic['branch_id'])?>">
                         <input type="hidden" name="student_id" value="<?=htmlspecialchars($basic['id'])?>">
                         <footer class="panel-footer">
@@ -929,14 +1101,14 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
             <div id="printResult" class="pt-sm pb-sm">
                 <div class="table-responsive">                                      
                     <table class="table table-bordered table-condensed text-dark" id="feeCollect">
-                    </table>
+                        </table>
                 </div>
             </div>
         </div>
         <footer class="panel-footer">
             <div class="row">
                 <div class="col-md-12 text-right">
-                    <button type="submit" class="btn btn-default" data-loading-text="<i class='fas fa-spinner fa-spin'></i> Processing"><?=translate('fee_payment') // Changed "Fee Payment" ?></button>
+                    <button type="submit" class="btn btn-default" data-loading-text="<i class='fas fa-spinner fa-spin'></i> Processing"><?=translate('fee_payment') ?></button>
                 </div>
             </div>
         </footer>
@@ -945,14 +1117,13 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
 </div>
 
 <script type="text/javascript">
-    var base_url = "<?php echo base_url(); ?>"; // Ensure base_url is correctly defined in your JS scope
+    var base_url = "<?php echo base_url(); ?>"; 
     var branchID = "<?php echo htmlspecialchars($basic['branch_id']); ?>";
     var studentID = "<?php echo htmlspecialchars($basic['id']); ?>";
 
-    // Ensure jQuery is loaded before this script
     $(document).ready(function() {
         $(".fee-selectAll").on("change", function(ev) {
-            var $chcks = $(this).closest("table").find("tbody input[type='checkbox']"); // Changed parent traversal
+            var $chcks = $(this).closest("table").find("tbody input[type='checkbox']");
             if($(this).is(':checked')) {
                 $chcks.prop('checked', true).trigger('change');
             } else {
@@ -967,18 +1138,18 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
             $("#invoiceSummary tbody input[name='cb_invoice']:checked").each(function() {
                 var allocationID = $(this).data("allocation-id");
                 var feeTypeID = $(this).data("fee-type-id");
-                var feeAmount = $(this).val(); // This is the original amount, not necessarily the balance
-                var item = {}; // Use 'item' instead of 'array' to avoid conflict with Array constructor
-                item ["feeAmount"] = feeAmount;
+                var item = {}; 
                 item ["allocationID"] = allocationID;
                 item ["feeTypeID"] = feeTypeID;
                 arrayData.push(item);
             });
 
             if (arrayData.length === 0) {
-                // Replace alert with a more user-friendly notification if possible (e.g., Bootstrap modal, toastr)
-                // For now, using the existing alert as per original code structure, though not ideal.
-                alert("<?=translate('no_rows_selected')?>"); 
+                if(typeof swal === 'function') {
+                    swal({title: "<?=translate('information')?>", text: "<?=translate('no_rows_selected')?>", type: "info", buttonsStyling: false, confirmButtonClass: "btn btn-default swal2-btn-default"});
+                } else {
+                    alert("<?=translate('no_rows_selected')?>"); 
+                }
                 $btn.button('reset');
             } else {
                 $.ajax({
@@ -990,35 +1161,33 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                         'student_id' : studentID,
                     },
                     dataType: "html",
-                    // async: false, // Avoid async: false if possible, it locks the browser
                     cache: false,
                     success: function (response) {
                         $("#feeCollect").html(response);
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) { // Added error handler
-                        console.error("AJAX Error for selectedFeesCollect: ", textStatus, errorThrown);
-                        alert("<?=translate('ajax_request_failed')?>: " + errorThrown);
-                        $btn.button('reset');
-                    },
-                    complete: function (jqXHR, textStatus) { // Check status in complete
-                        if (textStatus !== 'error') { // Only proceed if no error
-                            // Reinitialize plugins if they are dynamically loaded into the modal
-                            if (typeof $.fn.themePluginSelect2 === 'function') {
-                                $("#modal .selectTwo").each(function() { $(this).themePluginSelect2({}); });
-                            }
-                            if (typeof $.fn.themePluginDatePicker === 'function') {
-                                $("#modal .datepicker").each(function() { 
-                                    $(this).themePluginDatePicker({ "todayHighlight" : true, "endDate" : "today" }); 
-                                });
-                            }
-                            // Ensure mfp_modal function is available and correctly initializes Magnific Popup
-                            if (typeof mfp_modal === 'function') {
-                                mfp_modal('#modal');
-                            } else if (typeof $.magnificPopup !== 'undefined') {
-                                 $.magnificPopup.open({ items: { src: '#modal' }, type: 'inline' });
-                            }
+                        if (typeof $.fn.themePluginSelect2 === 'function') {
+                            $("#modal .selectTwo").each(function() { $(this).themePluginSelect2({}); });
                         }
-                        // $btn.button('reset'); // Reset is handled in error or after success logic
+                        if (typeof $.fn.themePluginDatePicker === 'function') {
+                            $("#modal .datepicker").each(function() { 
+                                $(this).themePluginDatePicker({ "todayHighlight" : true, "endDate" : "today" }); 
+                            });
+                        }
+                        if (typeof mfp_modal === 'function') {
+                            mfp_modal('#modal');
+                        } else if (typeof $.magnificPopup !== 'undefined') {
+                             $.magnificPopup.open({ items: { src: '#modal' }, type: 'inline', callbacks: { close: function() { $btn.button('reset');}} });
+                        } else {
+                             $btn.button('reset'); 
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) { 
+                        console.error("AJAX Error for selectedFeesCollect: ", textStatus, errorThrown);
+                        if(typeof swal === 'function') {
+                            swal({title: "<?=translate('error')?>", text: "<?=translate('ajax_request_failed')?>: " + errorThrown, type: "error", buttonsStyling: false, confirmButtonClass: "btn btn-default swal2-btn-default"});
+                        } else {
+                            alert("<?=translate('ajax_request_failed')?>: " + errorThrown);
+                        }
+                        $btn.button('reset');
                     }
                 });
             }
@@ -1029,6 +1198,7 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
             $btn.button('loading');
             var arrayData = [];
             var hasCheckedItems = false;
+            $("#invoiceSummary tbody tr").removeClass("hidden-print"); 
             $("#invoiceSummary tbody input[name='cb_invoice']").each(function() {
                 if($(this).is(':checked')) {
                     hasCheckedItems = true;
@@ -1045,9 +1215,13 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
             });
 
             if (!hasCheckedItems) { 
-                alert("<?=translate('no_rows_selected_to_print')?>");
+                if(typeof swal === 'function') {
+                    swal({title: "<?=translate('information')?>", text: "<?=translate('no_rows_selected_to_print')?>", type: "info", buttonsStyling: false, confirmButtonClass: "btn btn-default swal2-btn-default"});
+                } else {
+                    alert("<?=translate('no_rows_selected_to_print')?>");
+                }
                 $btn.button('reset');
-                $("#invoiceSummary tbody tr").removeClass("hidden-print");
+                $("#invoiceSummary tbody tr").removeClass("hidden-print"); 
             } else {
                 $("#invDetailsPrint").html(""); 
                 $.ajax({
@@ -1058,16 +1232,19 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                     cache: false,
                     success: function (response) {
                         $("#invDetailsPrint").html(response); 
-                        // Attempt to print after content is loaded
                         if (typeof fn_printElem === 'function') {
                             fn_printElem('invoice_print'); 
                         } else {
                             window.print(); 
                         }
                     },
-                    error: function(jqXHR, textStatus, errorThrown) { // Added error handler
+                    error: function(jqXHR, textStatus, errorThrown) { 
                         console.error("AJAX Error for printFeesInvoice: ", textStatus, errorThrown);
-                        alert("<?=translate('ajax_request_failed_for_print')?>: " + errorThrown);
+                        if(typeof swal === 'function') {
+                            swal({title: "<?=translate('error')?>", text: "<?=translate('ajax_request_failed_for_print')?>: " + errorThrown, type: "error", buttonsStyling: false, confirmButtonClass: "btn btn-default swal2-btn-default"});
+                        } else {
+                            alert("<?=translate('ajax_request_failed_for_print')?>: " + errorThrown);
+                        }
                     },
                     complete: function () {
                         $btn.button('reset');
@@ -1081,6 +1258,7 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
             $btn.button('loading');
             var arrayData = [];
             var hasCheckedPaymentItems = false;
+            $("#paymentHistory tbody tr").removeClass("hidden-print"); 
             $("#paymentHistory tbody input[name='cb_feePay']").each(function() {
                 if($(this).is(':checked')) {
                     hasCheckedPaymentItems = true;
@@ -1095,9 +1273,13 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
             });
 
             if (!hasCheckedPaymentItems) {
-                alert("<?=translate('no_payment_history_selected_to_print')?>");
+                if(typeof swal === 'function') {
+                    swal({title: "<?=translate('information')?>", text: "<?=translate('no_payment_history_selected_to_print')?>", type: "info", buttonsStyling: false, confirmButtonClass: "btn btn-default swal2-btn-default"});
+                } else {
+                    alert("<?=translate('no_payment_history_selected_to_print')?>");
+                }
                 $btn.button('reset');
-                $("#paymentHistory tbody tr").removeClass("hidden-print");
+                $("#paymentHistory tbody tr").removeClass("hidden-print"); 
             } else {
                 $("#invPaymentHistory").html("");
                 $.ajax({
@@ -1108,16 +1290,19 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                     cache: false,
                     success: function (response) {
                         $("#invPaymentHistory").html(response);
-                        // Attempt to print after content is loaded
                         if (typeof fn_printElem === 'function') {
                             fn_printElem('payment_print');
                         } else {
                             window.print();
                         }
                     },
-                    error: function(jqXHR, textStatus, errorThrown) { // Added error handler
+                    error: function(jqXHR, textStatus, errorThrown) { 
                         console.error("AJAX Error for printFeesPaymentHistory: ", textStatus, errorThrown);
-                        alert("<?=translate('ajax_request_failed_for_print')?>: " + errorThrown);
+                         if(typeof swal === 'function') {
+                            swal({title: "<?=translate('error')?>", text: "<?=translate('ajax_request_failed_for_print')?>: " + errorThrown, type: "error", buttonsStyling: false, confirmButtonClass: "btn btn-default swal2-btn-default"});
+                        } else {
+                            alert("<?=translate('ajax_request_failed_for_print')?>: " + errorThrown);
+                        }
                     },
                     complete: function () {
                         $btn.button('reset');
@@ -1134,7 +1319,11 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
             });
 
             if (paymentID.length === 0) {
-                alert("<?=translate('no_payment_selected_to_revert')?>");
+                if(typeof swal === 'function') {
+                    swal({title: "<?=translate('information')?>", text: "<?=translate('no_payment_selected_to_revert')?>", type: "info", buttonsStyling: false, confirmButtonClass: "btn btn-default swal2-btn-default"});
+                } else {
+                    alert("<?=translate('no_payment_selected_to_revert')?>");
+                }
                 return;
             }
 
@@ -1147,13 +1336,13 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                 text: "<?php echo translate('revert_this_payment_information') ?>",
                 type: "warning", 
                 showCancelButton: true,
-                confirmButtonClass: "btn btn-default swal2-btn-default", 
-                cancelButtonClass: "btn btn-default swal2-btn-default",
+                confirmButtonClass: "btn btn-default swal2-btn-confirm", 
+                cancelButtonClass: "btn btn-default swal2-btn-cancel",  
                 confirmButtonText: "<?php echo translate('yes_revert_it')?>",
                 cancelButtonText: "<?php echo translate('cancel')?>",
                 buttonsStyling: false, 
             }).then((result) => {
-                if (result.value || (result.isConfirmed)) { 
+                if (result.value || (typeof result.isConfirmed !== 'undefined' && result.isConfirmed)) { 
                     $.ajax({
                         url: base_url + 'fees/paymentRevert',
                         type: "POST",
@@ -1172,17 +1361,16 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                                 confirmButtonClass: "btn btn-default swal2-btn-default",
                                 type: data.status 
                             }).then((result) => {
-                                if (result.value || result.isConfirmed) {
+                                if (result.value || (typeof result.isConfirmed !== 'undefined' && result.isConfirmed)) {
                                     location.reload();
                                 }
                             });
                         },
                         error: function(xhr, status, error) { 
                             swal("<?php echo translate('error'); ?>", "<?php echo translate('ajax_request_failed'); ?>: " + error, "error");
-                            $this.button('reset');
+                            $this.button('reset'); 
                         },
                         complete: function () {
-                            // $this.button('reset'); // Reset is handled by success reload or error
                         }
                     });
                 } else {
@@ -1220,7 +1408,11 @@ $history_table_dynamic_colspan = $history_table_full_colspan - ($_overall_paymen
                     console.error("AJAX error getBalanceByType:", status, error);
                     $('#feeAmount').val('0.00');
                     $('#fineAmount').val('0.00');
-                    alert("<?=translate('ajax_request_failed_balance_type')?>");
+                    if(typeof swal === 'function') {
+                        swal({title: "<?=translate('error')?>", text: "<?=translate('ajax_request_failed_balance_type')?>", type: "error", buttonsStyling: false, confirmButtonClass: "btn btn-default swal2-btn-default"});
+                    } else {
+                        alert("<?=translate('ajax_request_failed_balance_type')?>");
+                    }
                 }
             });
         });

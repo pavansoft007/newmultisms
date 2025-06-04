@@ -2,16 +2,15 @@
 	<div class="tabs-custom">
 		<ul class="nav nav-tabs">
 			<?php
-			$this->db->where_not_in('id', array(1,6,7));
-			$roles = $this->db->get('roles')->result();
-			foreach ($roles as $role){
+			if (isset($allowed_roles) && is_array($allowed_roles) && count($allowed_roles)) {
+				foreach ($allowed_roles as $role) {
 			?> 	
-			<li class="<?php if ($role->id == $act_role) echo 'active'; ?>">
-				<a href="<?php echo base_url('employee/view/' . $role->id); ?>">
-					<i class="far fa-user-circle"></i> <?php echo $role->name?>
+			<li class="<?php if ($role['id'] == $act_role) echo 'active'; ?>">
+				<a href="<?php echo base_url('employee/view/' . $role['id']); ?>">
+					<i class="far fa-user-circle"></i> <?php echo $role['name'] ?>
 				</a>
 			</li>
-			<?php } ?>
+			<?php }} ?>
 		</ul>
 		<div class="tab-content">
 			<div class="tab-pane box active">

@@ -36,10 +36,16 @@
 							<div class="form-group">
 								<label class="control-label"><?=translate('role')?> <span class="required">*</span></label>
 								<?php
-									$role_list = $this->app_lib->getRoles();
-									echo form_dropdown("user_role", $role_list, set_value('user_role'), "class='form-control'
-									data-plugin-selectTwo data-width='100%' data-minimum-results-for-search='Infinity' ");
-								?>
+        if (isset($allowed_roles) && is_array($allowed_roles) && count($allowed_roles)) {
+            $role_list = array('' => translate('select'));
+            foreach ($allowed_roles as $role) {
+                $role_list[$role['id']] = $role['name'];
+            }
+        } else {
+            $role_list = array('' => translate('no_roles_available'));
+        }
+        echo form_dropdown("user_role", $role_list, set_value('user_role'), "class='form-control' data-plugin-selectTwo data-width='100%' data-minimum-results-for-search='Infinity' ");
+        ?>
 								<span class="error"><?php echo form_error('user_role'); ?></span>
 							</div>
 						</div>

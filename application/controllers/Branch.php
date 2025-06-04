@@ -13,17 +13,22 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Branch extends Admin_Controller
 {
+    protected $data = array();
 
     public function __construct()
     {
         parent::__construct();
         $this->load->model('branch_model');
+        $this->load->model('role_model');
+        $this->load->library('form_validation');
+        $this->load->library('session');
     }
 
     /* branch all data are prepared and stored in the database here */
     public function index()
     {
         if (is_superadmin_loggedin()) {
+            $this->data['role_groups'] = $this->role_model->getRoleGroups();
             if ($this->input->post('submit') == 'save') {
                 $this->form_validation->set_rules('branch_name', translate('branch_name'), 'required|callback_unique_name');
                 $this->form_validation->set_rules('school_name', translate('school_name'), 'required');
@@ -34,6 +39,9 @@ class Branch extends Admin_Controller
                 if ($this->form_validation->run() == true) {
                     $post = $this->input->post();
                     $response = $this->branch_model->save($post);
+                    if (isset($post['role_group_id'])) {
+                        $this->branch_model->setRoleGroupId($response, $post['role_group_id']);
+                    }
                     if ($response) {
                         set_alert('success', translate('information_has_been_saved_successfully'));
                     }
@@ -64,6 +72,7 @@ class Branch extends Admin_Controller
     public function edit($id = '')
     {
         if (is_superadmin_loggedin()) {
+            $this->data['role_groups'] = $this->role_model->getRoleGroups();
             if ($this->input->post('submit') == 'save') {
                 $this->form_validation->set_rules('branch_name', translate('branch_name'), 'required|callback_unique_name');
                 $this->form_validation->set_rules('school_name', translate('school_name'), 'required');
@@ -74,13 +83,17 @@ class Branch extends Admin_Controller
                 if ($this->form_validation->run() == true) {
                     $post = $this->input->post();
                     $response = $this->branch_model->save($post, $id);
+                    if (isset($post['role_group_id'])) {
+                        $this->branch_model->setRoleGroupId($id, $post['role_group_id']);
+                    }
                     if ($response) {
                         set_alert('success', translate('information_has_been_updated_successfully'));
                     }
                     redirect(base_url('branch'));
+                } else {
+                    $this->data['validation_error'] = true;
                 }
             }
-
             $this->data['data'] = $this->branch_model->getSingle('branch', $id, true);
             $this->data['title'] = translate('branch');
             $this->data['sub_page'] = 'branch/edit';
