@@ -120,6 +120,19 @@
 							<textarea type="text" rows="3" class="form-control" name="address" ><?=set_value('address')?></textarea>
 						</div>
 					</div>
+					<?php if (is_superadmin_loggedin()): ?>
+					<div class="form-group">
+						<label class="col-md-3 control-label">Role Group</label>
+						<div class="col-md-9">
+							<select name="role_group_id" class="form-control">
+								<option value="">Select Role Group</option>
+								<?php foreach($role_groups as $group): ?>
+									<option value="<?=$group['id']?>"><?=html_escape($group['name'])?></option>
+								<?php endforeach; ?>
+							</select>
+						</div>
+					</div>
+					<?php endif; ?>
 					<div class="form-group">
 						<div class="col-md-offset-3 col-md-3">
 							<label class="control-label pt-none"><?=translate('system_logo');?></label>

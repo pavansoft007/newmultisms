@@ -4,6 +4,7 @@
 		<ul class="nav nav-tabs">
 			<li><a href="<?=base_url('sendsmsmail/sms')?>"> <i class="far fa-comment"></i> SMS</a> </li>
 			<li class="active"> <a href="#add" data-toggle="tab"> <i class="far fa-envelope"></i> Email</a> </li>
+			<li><a href="<?=base_url('sendsmsmail/whatsapp')?>"> <i class="fab fa-whatsapp"></i> WhatsApp</a> </li>
 		</ul>
 		<div class="tab-content">
 			<div class="tab-pane box active" id="add">

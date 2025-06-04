@@ -67,4 +67,16 @@ class Branch_model extends MY_Model
             return false;
         }
     }
+
+    public function getRoleGroupId($branch_id) {
+        $this->db->select('role_group_id');
+        $this->db->from('branch');
+        $this->db->where('id', $branch_id);
+        $row = $this->db->get()->row_array();
+        return $row ? $row['role_group_id'] : null;
+    }
+    public function setRoleGroupId($branch_id, $role_group_id) {
+        $this->db->where('id', $branch_id);
+        $this->db->update('branch', ['role_group_id' => $role_group_id]);
+    }
 }

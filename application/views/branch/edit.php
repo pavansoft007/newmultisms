@@ -92,6 +92,19 @@
 							<input type="file" name="report_card" class="dropify" data-allowed-file-extensions="png" data-default-file="<?=$this->application_model->getBranchImage($data->id, 'report-card-logo')?>" />
 						</div>
 					</div>
+					<?php if (is_superadmin_loggedin()): ?>
+					<div class="form-group">
+					    <label class="col-md-3 control-label">Role Group</label>
+					    <div class="col-md-9">
+					        <select name="role_group_id" class="form-control">
+					            <option value="">Select Role Group</option>
+					            <?php foreach($role_groups as $group): ?>
+					                <option value="<?=$group['id']?>" <?php if(isset($data['role_group_id']) && $data['role_group_id']==$group['id']) echo 'selected'; ?>><?=html_escape($group['name'])?></option>
+					            <?php endforeach; ?>
+					        </select>
+					    </div>
+					</div>
+					<?php endif; ?>
 					<footer class="panel-footer mt-lg">
 						<div class="row">
 							<div class="col-md-2 col-md-offset-3">

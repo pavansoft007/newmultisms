@@ -71,15 +71,25 @@ class Employee extends Admin_Controller
     /* getting all employee list */
     public function view($role = 2)
     {
-        if (!get_permission('employee', 'is_view') || ($role == 1 || $role == 6 || $role == 7)) {
+        if (!get_permission('employee', 'is_view') || ($role == 6 || $role == 7)) {
             access_denied();
         }
-        $branchID = $this->application_model->get_branch_id();
+        $branch_id = $this->application_model->get_branch_id();
+        $this->load->model('role_model');
+        $this->load->model('branch_model');
+        $user_role = loggedin_role_id();
+        if ($user_role == 1) {
+            $allowed_roles = $this->role_model->getRoleList();
+        } else {
+            $role_group_id = $this->branch_model->getRoleGroupId($branch_id);
+            $allowed_roles = $role_group_id ? $this->role_model->getRolesByGroup($role_group_id) : [];
+        }
+        $this->data['allowed_roles'] = $allowed_roles;
         $this->data['act_role'] = $role;
         $this->data['title'] = translate('employee');
         $this->data['sub_page'] = 'employee/view';
         $this->data['main_menu'] = 'employee';
-        $this->data['stafflist'] = $this->employee_model->getStaffList($branchID, $role);
+        $this->data['stafflist'] = $this->employee_model->getStaffList($branch_id, $role);
         $this->load->view('layout/index', $this->data);
     }
 
@@ -98,6 +108,17 @@ class Employee extends Admin_Controller
         if (!get_permission('employee', 'is_add')) {
             access_denied();
         }
+        $branch_id = $this->application_model->get_branch_id();
+        $this->load->model('role_model');
+        $this->load->model('branch_model');
+        $user_role = loggedin_role_id();
+        if ($user_role == 1) {
+            $allowed_roles = $this->role_model->getRoleList();
+        } else {
+            $role_group_id = $this->branch_model->getRoleGroupId($branch_id);
+            $allowed_roles = $role_group_id ? $this->role_model->getRolesByGroup($role_group_id) : [];
+        }
+        $this->data['allowed_roles'] = $allowed_roles;
         if ($_POST) {
             $this->employee_validation();
             if (!isset($_POST['chkskipped'])) {
@@ -107,7 +128,6 @@ class Employee extends Admin_Controller
                 //save all employee information in the database
                 $post = $this->input->post();
                 $empID = $this->employee_model->save($post);
-                
                 // handle custom fields data
                 $class_slug = $this->router->fetch_class();
                 $customField = $this->input->post("custom_fields[$class_slug]");
@@ -115,13 +135,12 @@ class Employee extends Admin_Controller
                     saveCustomFields($customField, $empID);
                 }
                 set_alert('success', translate('information_has_been_saved_successfully'));
-                
                 //send account activate email
                 $this->email_model->sentStaffRegisteredAccount($post);
                 redirect(base_url('employee/view/' . $post['user_role']));
             }
         }
-        $this->data['branch_id'] = $this->application_model->get_branch_id();
+        $this->data['branch_id'] = $branch_id;
         $this->data['title'] = translate('add_employee');
         $this->data['sub_page'] = 'employee/add';
         $this->data['main_menu'] = 'employee';

@@ -154,5 +154,8 @@
         </div>
     </div>
     <?php } ?>
+
+    <!-- Mobile Footer Navigation -->
+    <?php $CI =& get_instance(); $CI->load->view('layout/footer.php'); ?>
 </body>
 </html>

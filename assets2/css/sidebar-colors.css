@@ -1,0 +1,312 @@
+/* Sidebar Color Options */
+
+/* Default White - No additional CSS needed */
+
+/* Blue Sidebar */
+html .sidebar-left.sidebar-color-blue {
+    background-color: #3A3978 !important;
+}
+
+html .sidebar-left.sidebar-color-blue .sidebar-header {
+    background-color: #2d2d5e;
+}
+
+html .sidebar-left.sidebar-color-blue .nano-content {
+    background-color: #3A3978 !important;
+}
+
+html .sidebar-left.sidebar-color-blue .nano-content > .nav-main > li.nav-active > a {
+    background: #2d2d5e;
+}
+
+html .sidebar-left.sidebar-color-blue .nano-content > .nav-main li .nav-children {
+    background-color: #2d2d5e;
+}
+
+html .sidebar-left.sidebar-color-blue .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a {
+    background: #252550;
+}
+
+html .sidebar-left.sidebar-color-blue .nano-content > .nav-main > li > a {
+    color: #fff;
+}
+
+html .sidebar-left.sidebar-color-blue .nano-content > .nav-main li .nav-children li a {
+    color: #fff;
+}
+
+html .sidebar-left.sidebar-color-blue .sidebar-title {
+    color: #fff;
+}
+
+/* Green Sidebar */
+html .sidebar-left.sidebar-color-green {
+    background-color: #28a745 !important;
+}
+
+html .sidebar-left.sidebar-color-green .sidebar-header {
+    background-color: #218838;
+}
+
+html .sidebar-left.sidebar-color-green .nano-content {
+    background-color: #28a745 !important;
+}
+
+html .sidebar-left.sidebar-color-green .nano-content > .nav-main > li.nav-active > a {
+    background: #218838;
+}
+
+html .sidebar-left.sidebar-color-green .nano-content > .nav-main li .nav-children {
+    background-color: #218838;
+}
+
+html .sidebar-left.sidebar-color-green .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a {
+    background: #1a6e2d;
+}
+
+html .sidebar-left.sidebar-color-green .nano-content > .nav-main > li > a {
+    color: #fff;
+}
+
+html .sidebar-left.sidebar-color-green .nano-content > .nav-main li .nav-children li a {
+    color: #fff;
+}
+
+html .sidebar-left.sidebar-color-green .sidebar-title {
+    color: #fff;
+}
+
+/* Purple Sidebar */
+html .sidebar-left.sidebar-color-purple {
+    background-color: #6f42c1 !important;
+}
+
+html .sidebar-left.sidebar-color-purple .sidebar-header {
+    background-color: #5e35a1;
+}
+
+html .sidebar-left.sidebar-color-purple .nano-content {
+    background-color: #6f42c1 !important;
+}
+
+html .sidebar-left.sidebar-color-purple .nano-content > .nav-main > li.nav-active > a {
+    background: #5e35a1;
+}
+
+html .sidebar-left.sidebar-color-purple .nano-content > .nav-main li .nav-children {
+    background-color: #5e35a1;
+}
+
+html .sidebar-left.sidebar-color-purple .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a {
+    background: #4e2b87;
+}
+
+html .sidebar-left.sidebar-color-purple .nano-content > .nav-main > li > a {
+    color: #dc3545;
+}
+
+html .sidebar-left.sidebar-color-purple .nano-content > .nav-main li .nav-children li a {
+    color: #dc3545;
+}
+
+html .sidebar-left.sidebar-color-purple .sidebar-title {
+    color: #dc3545;
+}
+
+/* Red Sidebar */
+html .sidebar-left.sidebar-color-red {
+    background-color: #dc3545 !important;
+}
+
+html .sidebar-left.sidebar-color-red .sidebar-header {
+    background-color: #bd2130;
+}
+
+html .sidebar-left.sidebar-color-red .nano-content {
+    background-color: #dc3545 !important;
+}
+
+html .sidebar-left.sidebar-color-red .nano-content > .nav-main > li.nav-active > a {
+    background: #bd2130;
+}
+
+html .sidebar-left.sidebar-color-red .nano-content > .nav-main li .nav-children {
+    background-color: #bd2130;
+}
+
+html .sidebar-left.sidebar-color-red .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a {
+    background: #a01b29;
+}
+
+html .sidebar-left.sidebar-color-red .nano-content > .nav-main > li > a {
+    color: #dc3545;
+}
+
+html .sidebar-left.sidebar-color-red .nano-content > .nav-main li .nav-children li a {
+    color: #dc3545;
+}
+
+html .sidebar-left.sidebar-color-red .sidebar-title {
+    color: #dc3545;
+}
+
+/* Dark Sidebar */
+html .sidebar-left.sidebar-color-dark {
+    background-color: #343a40 !important;
+}
+
+html .sidebar-left.sidebar-color-dark .sidebar-header {
+    background-color: #23272b;
+}
+
+html .sidebar-left.sidebar-color-dark .nano-content {
+    background-color: #343a40 !important;
+}
+
+html .sidebar-left.sidebar-color-dark .nano-content > .nav-main > li.nav-active > a {
+    background: #23272b;
+}
+
+html .sidebar-left.sidebar-color-dark .nano-content > .nav-main li .nav-children {
+    background-color: #23272b;
+}
+
+html .sidebar-left.sidebar-color-dark .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a {
+    background: #16191c;
+}
+
+html .sidebar-left.sidebar-color-dark .nano-content > .nav-main > li > a {
+    color: #dc3545;
+}
+
+html .sidebar-left.sidebar-color-dark .nano-content > .nav-main li .nav-children li a {
+    color: #dc3545;
+}
+
+html .sidebar-left.sidebar-color-dark .sidebar-title {
+    color: #dc3545;
+}
+
+/* Text Color Classes */
+html .sidebar-left.sidebar-text-light .nano-content > .nav-main > li > a,
+html .sidebar-left.sidebar-text-light .nano-content > .nav-main li .nav-children li a,
+html .sidebar-left.sidebar-text-light .sidebar-title {
+    color: #dc3545 !important;
+}
+
+html .sidebar-left.sidebar-text-dark .nano-content > .nav-main > li > a,
+html .sidebar-left.sidebar-text-dark .nano-content > .nav-main li .nav-children li a,
+html .sidebar-left.sidebar-text-dark .sidebar-title {
+    color: #333 !important;
+}
+
+/* Menu Text Color */
+html .sidebar-left .nano-content > .nav-main > li > a.menu-text-light,
+html .sidebar-left .nano-content > .nav-main > li.menu-text-light > a {
+    color: #dc3545 !important;
+}
+
+html .sidebar-left .nano-content > .nav-main > li > a.menu-text-dark,
+html .sidebar-left .nano-content > .nav-main > li.menu-text-dark > a {
+    color: #333 !important;
+}
+
+/* Menu Background Color */
+html .sidebar-left .nano-content > .nav-main > li.menu-bg-light {
+    background-color: #f8f9fa;
+}
+
+html .sidebar-left .nano-content > .nav-main > li.menu-bg-dark {
+    background-color: #343a40;
+}
+
+/* Active Menu Text Color */
+html .sidebar-left .nano-content > .nav-main > li.nav-active > a.active-menu-text-light,
+html .sidebar-left .nano-content > .nav-main > li.nav-active.active-menu-text-light > a {
+    color: #dc3545 !important;
+}
+
+html .sidebar-left .nano-content > .nav-main > li.nav-active > a.active-menu-text-dark,
+html .sidebar-left .nano-content > .nav-main > li.nav-active.active-menu-text-dark > a {
+    color: #333 !important;
+}
+
+html .sidebar-left .nano-content > .nav-main > li.nav-active > a.active-menu-text-primary,
+html .sidebar-left .nano-content > .nav-main > li.nav-active.active-menu-text-primary > a {
+    color: #007bff !important;
+}
+
+/* Active Menu Background */
+html .sidebar-left .nano-content > .nav-main > li.nav-active.active-menu-bg-light {
+    background-color: #f8f9fa !important;
+}
+
+html .sidebar-left .nano-content > .nav-main > li.nav-active.active-menu-bg-primary {
+    background-color: #007bff !important;
+}
+
+html .sidebar-left .nano-content > .nav-main > li.nav-active.active-menu-bg-dark {
+    background-color: #343a40 !important;
+}
+
+/* Menu Hover Style */
+html .sidebar-left .nano-content > .nav-main > li.menu-hover-light:hover {
+    background-color: #f8f9fa;
+}
+
+html .sidebar-left .nano-content > .nav-main > li.menu-hover-dark:hover {
+    background-color: #343a40;
+}
+
+html .sidebar-left .nano-content > .nav-main > li.menu-hover-primary:hover {
+    background-color: #007bff;
+}
+
+/* Dark Mode Compatibility */
+html.dark .sidebar-left.sidebar-color-blue,
+html.dark .sidebar-left.sidebar-color-green,
+html.dark .sidebar-left.sidebar-color-purple,
+html.dark .sidebar-left.sidebar-color-red,
+html.dark .sidebar-left.sidebar-color-dark {
+    background-color: inherit !important;
+}
+
+html.dark .sidebar-left.sidebar-color-blue .sidebar-header,
+html.dark .sidebar-left.sidebar-color-green .sidebar-header,
+html.dark .sidebar-left.sidebar-color-purple .sidebar-header,
+html.dark .sidebar-left.sidebar-color-red .sidebar-header,
+html.dark .sidebar-left.sidebar-color-dark .sidebar-header {
+    background-color: inherit;
+}
+
+html.dark .sidebar-left.sidebar-color-blue .nano-content,
+html.dark .sidebar-left.sidebar-color-green .nano-content,
+html.dark .sidebar-left.sidebar-color-purple .nano-content,
+html.dark .sidebar-left.sidebar-color-red .nano-content,
+html.dark .sidebar-left.sidebar-color-dark .nano-content {
+    background-color: inherit !important;
+}
+
+html.dark .sidebar-left.sidebar-color-blue .nano-content > .nav-main > li.nav-active > a,
+html.dark .sidebar-left.sidebar-color-green .nano-content > .nav-main > li.nav-active > a,
+html.dark .sidebar-left.sidebar-color-purple .nano-content > .nav-main > li.nav-active > a,
+html.dark .sidebar-left.sidebar-color-red .nano-content > .nav-main > li.nav-active > a,
+html.dark .sidebar-left.sidebar-color-dark .nano-content > .nav-main > li.nav-active > a {
+    background: inherit;
+}
+
+html.dark .sidebar-left.sidebar-color-blue .nano-content > .nav-main li .nav-children,
+html.dark .sidebar-left.sidebar-color-green .nano-content > .nav-main li .nav-children,
+html.dark .sidebar-left.sidebar-color-purple .nano-content > .nav-main li .nav-children,
+html.dark .sidebar-left.sidebar-color-red .nano-content > .nav-main li .nav-children,
+html.dark .sidebar-left.sidebar-color-dark .nano-content > .nav-main li .nav-children {
+    background-color: inherit;
+}
+
+html.dark .sidebar-left.sidebar-color-blue .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a,
+html.dark .sidebar-left.sidebar-color-green .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a,
+html.dark .sidebar-left.sidebar-color-purple .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a,
+html.dark .sidebar-left.sidebar-color-red .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a,
+html.dark .sidebar-left.sidebar-color-dark .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a {
+    background: inherit;
+}

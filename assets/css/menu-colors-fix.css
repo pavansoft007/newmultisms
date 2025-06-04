@@ -1,0 +1,64 @@
+/* Menu Text Color - Light */
+.menu-text-light .sidebar-left .nano-content > .nav-main > li > a {
+    color: #fff !important;
+}
+
+/* Menu Text Color - Dark */
+.menu-text-dark .sidebar-left .nano-content > .nav-main > li > a {
+    color: #333 !important;
+}
+
+/* Menu Background Color - Light */
+.menu-bg-light .sidebar-left .nano-content > .nav-main > li {
+    background-color: #f8f9fa !important;
+}
+
+/* Menu Background Color - Dark */
+.menu-bg-dark .sidebar-left .nano-content > .nav-main > li {
+    background-color: #343a40 !important;
+}
+
+/* Active Menu Text Color - Light */
+.active-menu-text-light .sidebar-left .nano-content > .nav-main > li.nav-active > a {
+    color: #fff !important;
+}
+
+/* Active Menu Text Color - Dark */
+.active-menu-text-dark .sidebar-left .nano-content > .nav-main > li.nav-active > a {
+    color: #333 !important;
+}
+
+/* Active Menu Text Color - Primary */
+.active-menu-text-primary .sidebar-left .nano-content > .nav-main > li.nav-active > a {
+    color: #007bff !important;
+}
+
+/* Active Menu Background - Light */
+.active-menu-bg-light .sidebar-left .nano-content > .nav-main > li.nav-active {
+    background-color: #f8f9fa !important;
+}
+
+/* Active Menu Background - Primary */
+.active-menu-bg-primary .sidebar-left .nano-content > .nav-main > li.nav-active {
+    background-color: #007bff !important;
+}
+
+/* Active Menu Background - Dark */
+.active-menu-bg-dark .sidebar-left .nano-content > .nav-main > li.nav-active {
+    background-color: #343a40 !important;
+}
+
+/* Menu Hover Style - Light */
+.menu-hover-light .sidebar-left .nano-content > .nav-main > li:hover {
+    background-color: #f8f9fa !important;
+}
+
+/* Menu Hover Style - Dark */
+.menu-hover-dark .sidebar-left .nano-content > .nav-main > li:hover {
+    background-color: #343a40 !important;
+}
+
+/* Menu Hover Style - Primary */
+.menu-hover-primary .sidebar-left .nano-content > .nav-main > li:hover {
+    background-color: #007bff !important;
+}

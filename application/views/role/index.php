@@ -7,6 +7,9 @@
 			<li class="<?php echo (isset($validation_error) ? 'active' : ''); ?>">
 				<a href="#create" data-toggle="tab"><i class="far fa-edit"></i> <?php echo translate('create') . " " . translate('role'); ?></a>
 			</li>
+			<li>
+				<a href="<?php echo base_url('role/groups'); ?>"><i class="fas fa-layer-group"></i> <?php echo 'Role Groups'; ?></a>
+			</li>
 		</ul>
 		<div class="tab-content">
 			<div id="list" class="tab-pane <?php echo (!isset($validation_error) ? 'active' : ''); ?>">

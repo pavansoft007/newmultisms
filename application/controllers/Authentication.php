@@ -23,7 +23,7 @@ class Authentication extends Authentication_Controller
     public function index($url_alias = '')
     {
         if (is_loggedin()) {
-            redirect(base_url('dashboard'));
+            redirect(base_url('mainmenu'));
         }
 
         if ($_POST) {
@@ -75,7 +75,7 @@ class Authentication extends Authentication_Controller
                         if ($this->session->has_userdata('redirect_url')) {
                             redirect($this->session->userdata('redirect_url'));
                         } else {
-                            redirect(base_url('dashboard'));
+                            redirect(base_url('mainmenu'));
                         }
 
                     } else {
@@ -90,7 +90,27 @@ class Authentication extends Authentication_Controller
             }
         }
         $this->data['branch_id'] = $this->authentication_model->urlaliasToBranch($url_alias);
-        $this->load->view('authentication/login', $this->data);
+
+        // Mobile detection: if mobile, use mobile login view
+        $is_mobile = false;
+        if (isset($_SERVER['HTTP_USER_AGENT'])) {
+            $user_agent = $_SERVER['HTTP_USER_AGENT'];
+            $mobile_agents = array('Android', 'webOS', 'iPhone', 'iPad', 'iPod', 'BlackBerry', 'Windows Phone', 'Mobile', 'Opera Mini', 'Opera Mobi', 'IEMobile', 'Silk', 'Kindle');
+            foreach ($mobile_agents as $agent) {
+                if (stripos($user_agent, $agent) !== false) {
+                    $is_mobile = true;
+                    break;
+                }
+            }
+        }
+        if ($is_mobile) {
+            $data = isset($this->data) ? $this->data : array();
+            $this->load->view('authentication/login_mobile', $data);
+        } else {
+            $data = isset($this->data) ? $this->data : array();
+            $this->load->view('authentication/login', $data);
+        }
+        return;
     }
 
     // forgot password

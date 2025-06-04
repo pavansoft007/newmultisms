@@ -172,7 +172,7 @@ class Fees_model extends MY_Model
         if (($payment_amount <= $total_due) && ($payment_amount > 0)) {
             $arrayHistory = array(
                 'fee_invoice_id' => $id,
-                'collect_by' => get_user_stamp(),
+                'collect_by' => $this->session->userdata('loggedin_userid'),
                 'remarks' => $data['remarks'],
                 'method' => $data['method'],
                 'amount' => $payment_amount,

@@ -10,12 +10,16 @@ class MY_Model extends CI_Model {
 		return hash("sha512", $password . config_item("encryption_key"));
 	}
 	
-	public function uploadImage($role, $fields = "user_photo") {
+	// Ensure upload library is loaded for image upload
+    public function uploadImage($role, $fields = "user_photo") {
+        if (!isset($this->upload)) {
+            $this->load->library('upload');
+        }
 		$return_photo = 'defualt.png';
 		$old_user_photo = $this->input->post('old_user_photo');
 		if (isset($_FILES["$fields"]) && !empty($_FILES["$fields"]['name'])) {
 			$config['upload_path'] = './uploads/images/' . $role . '/';
-			$config['allowed_types'] = '*';
+			$config['allowed_types'] = 'jpg|jpeg|png|gif'; // Restrict to image types only
 			$config['overwrite'] = FALSE;
 			$config['encrypt_name'] = TRUE;
 			$this->upload->initialize($config);

@@ -18,6 +18,7 @@ class Sendsmsmail extends Admin_Controller
     {
         parent::__construct();
         $this->load->library('mailer');
+        $this->load->library('Aisensy_whatsapp'); // Load the new library
         $this->load->model('sendsmsmail_model');
     }
 
@@ -66,6 +67,29 @@ class Sendsmsmail extends Admin_Controller
         $this->load->view('layout/index', $this->data);
     }
 
+    public function whatsapp()
+    {
+        if (!get_permission('sendsmsmail', 'is_add')) { // Assuming same permission for now
+            access_denied();
+        }
+        $branchID = $this->application_model->get_branch_id();
+        $this->data['headerelements'] = array(
+            'css' => array(
+                'vendor/summernote/summernote.css', // Assuming similar editor needs
+                'vendor/bootstrap-timepicker/css/bootstrap-timepicker.css',
+            ),
+            'js' => array(
+                'vendor/bootstrap-timepicker/bootstrap-timepicker.js',
+                'vendor/summernote/summernote.js', // Assuming similar editor needs
+            ),
+        );
+        $this->data['branch_id'] = $branchID;
+        $this->data['title'] = translate('bulk_sms_and_email');
+        $this->data['sub_page'] = 'sendsmsmail/whatsapp';
+        $this->data['main_menu'] = 'sendsmsmail';
+        $this->load->view('layout/index', $this->data);
+    }
+
     public function delete($id)
     {
         if (get_permission('sendsmsmail', 'is_delete')) {
@@ -85,7 +109,9 @@ class Sendsmsmail extends Admin_Controller
         $branchID = $this->application_model->get_branch_id();
         if ($_POST) {
             $sendType = $this->input->post('send_type');
-            $campaignType = $this->input->post('campaign_type');
+            $campaign_type_post = $this->input->post('campaign_type');
+            // Assuming campaign_type from form will be 'sms', 'email', or 'whatsapp'
+            $campaignType = ($campaign_type_post == 'sms' ? 1 : ($campaign_type_post == 'email' ? 2 : 3));
             $daterange = explode(' - ', $this->input->post('daterange'));
             $start = date("Y-m-d", strtotime($daterange[0]));
             $end = date("Y-m-d", strtotime($daterange[1]));
@@ -122,7 +148,10 @@ class Sendsmsmail extends Admin_Controller
         }
 
         if ($_POST) {
-            $messageType = ($this->input->post('message_type') == 'sms' ? 1 : 2);
+            log_message('error', 'Save method entered via POST.');
+            $message_type_post = $this->input->post('message_type');
+            $messageType = ($message_type_post == 'sms' ? 1 : ($message_type_post == 'email' ? 2 : 3));
+            log_message('error', 'MessageType determined: ' . $messageType . ' (Expecting 3 for WhatsApp)');
             $branchID = $this->application_model->get_branch_id();
             $recipientType = $this->input->post('recipient_type');
             if (is_superadmin_loggedin()) {
@@ -132,8 +161,11 @@ class Sendsmsmail extends Admin_Controller
             $this->form_validation->set_rules('message', translate('message'), 'trim|required');
             if ($messageType == 1) {
                 $this->form_validation->set_rules('sms_gateway', translate('sms_gateway'), 'trim|required');
-            } else {
+            } elseif ($messageType == 2) {
                 $this->form_validation->set_rules('email_subject', translate('email_subject'), 'trim|required');
+            } else { // WhatsApp
+                // Add WhatsApp specific validation if needed, e.g., template name or ID from Aisensy
+                $this->form_validation->set_rules('whatsapp_template_name', translate('whatsapp_template_name'), 'trim|required');
             }
             $this->form_validation->set_rules('recipient_type', translate('type'), 'trim|required');
             if ($recipientType == 1) {
@@ -154,6 +186,7 @@ class Sendsmsmail extends Admin_Controller
             }
 
             if ($this->form_validation->run() !== false) {
+                log_message('error', 'Form validation passed.');
                 $user_array = array();
                 $receivedDetails = array();
                 $campaignName = $this->input->post('campaign_name');
@@ -161,8 +194,10 @@ class Sendsmsmail extends Admin_Controller
                 $scheduleDate = $this->input->post('schedule_date');
                 $scheduleTime = $this->input->post('schedule_time');
                 $sendLater = (isset($_POST['send_later']) ? 1 : 2);
+                log_message('error', 'Send Later status: ' . $sendLater . ' (1 means Send Later is ON, 2 means Send Now)');
                 $emailSubject = $this->input->post('email_subject');
                 $smsGateway = $this->input->post('sms_gateway');
+                $whatsappTemplateName = $this->input->post('whatsapp_template_name');
                 
                 if ($recipientType == 1) {
                     $roleGroup = $this->input->post('role_group[]');
@@ -266,14 +301,72 @@ class Sendsmsmail extends Admin_Controller
                 }
 
                 $sCount = 0;
+                log_message('error', 'User array count: ' . count($user_array));
                 if ($sendLater == 1) {
+                    log_message('error', 'Send Later is ON. Skipping immediate send.');
                     $additional = json_encode($user_array);
                 } else {
+                    log_message('error', 'Send Later is OFF. Proceeding with immediate send.');
                     foreach ($user_array as $key => $value) {
+                        log_message('error', 'Processing user: ' . $value['name'] . ' with mobile: ' . $value['mobileno']);
                         if ($messageType == 1) {
+                            log_message('error', 'Attempting to send SMS.');
                             $response = $this->sendsmsmail_model->sendSMS($value['mobileno'], $message, $value['name'], $value['email'], $smsGateway);
-                        } else {
+                        } elseif ($messageType == 2) {
+                            log_message('error', 'Attempting to send Email.');
                             $response = $this->sendsmsmail_model->sendEmail($value['email'], $message, $value['name'], $value['mobileno'], $emailSubject);
+                        } else { // WhatsApp
+                            log_message('error', 'Attempting to send WhatsApp via Aisensy.');
+                            // Format mobile number: remove '+' and ensure '91' prefix for 10-digit numbers
+                            $mobileNumber = $value['mobileno'];
+                            // Remove any non-numeric characters except '+'
+                            $mobileNumber = preg_replace('/[^\d+]/', '', $mobileNumber);
+                            // Remove leading '+'
+                            if (strpos($mobileNumber, '+') === 0) {
+                                $mobileNumber = substr($mobileNumber, 1);
+                            }
+                            // If it's a 10-digit number, assume it's Indian and prefix with 91 if not already prefixed
+                            if (strlen($mobileNumber) == 10 && strpos($mobileNumber, '91') !== 0) {
+                                $mobileNumber = '91' . $mobileNumber;
+                            } elseif (strlen($mobileNumber) == 12 && strpos($mobileNumber, '91') === 0) {
+                                // Already in 91xxxxxxxxxx format
+                            } elseif (strlen($mobileNumber) > 12 && strpos($mobileNumber, '91') === 0) {
+                                // Potentially has +91 already, ensure it's just 91...
+                                if (strpos($mobileNumber, '+91') === 0) {
+                                   $mobileNumber = substr($mobileNumber, 1); // remove +
+                                }
+                            }
+                             // else, use as is, assuming it's already correctly formatted with country code
+
+                            // Parameters as per the user's provided JSON structure
+                            $template_params_list_for_api = ['$FirstName', '$FirstName'];
+                            $params_fallback_value_for_api = ['FirstName' => 'user'];
+                            $source_for_api = "new-landing-page form";
+
+                            // $whatsappTemplateName is fetched (line 200) and stored (line 384) for internal use.
+                            // The $message variable (line 193) is also stored (line 367).
+                            // The log reflects the parameters being sent to the new send_message signature.
+                            log_message('error', 'Calling aisensy_whatsapp->send_message with mobile: ' . $mobileNumber . ', campaign: ' . $campaignName . ', template_params_list: ' . json_encode($template_params_list_for_api) . ', source: ' . $source_for_api . ', fallback: ' . json_encode($params_fallback_value_for_api));
+                            $api_response = $this->aisensy_whatsapp->send_message(
+                                $mobileNumber,                      // destination
+                                $campaignName,                      // campaignName
+                                $template_params_list_for_api,      // templateParams
+                                $source_for_api,                    // source
+                                [],                                 // media (empty object {} as per JSON)
+                                [],                                 // buttons (empty array [] as per JSON)
+                                [],                                 // carouselCards (empty array [] as per JSON)
+                                [],                                 // location (empty object {} as per JSON)
+                                [],                                 // attributes (empty object {} as per JSON)
+                                $params_fallback_value_for_api      // paramsFallbackValue
+                            );
+                            if (isset($api_response['status']) && $api_response['status'] == 'success') {
+                                $response = true;
+                                log_message('error', 'Aisensy API call successful for ' . $value['mobileno']);
+                            } else {
+                                $response = false;
+                                // Log detailed error from $api_response
+                                log_message('error', 'Aisensy WhatsApp sending FAILED for ' . $value['mobileno'] . ': ' . json_encode($api_response));
+                            }
                         }
                         if ($response == true) {
                             $sCount++;
@@ -297,19 +390,25 @@ class Sendsmsmail extends Admin_Controller
                 );
                 if ($messageType == 1) {
                     $arrayData['sms_gateway'] = $smsGateway;
-                } else {
+                } elseif ($messageType == 2) {
                     $arrayData['email_subject'] = $emailSubject;
+                } else {
+                    // Add any WhatsApp specific data to store
+                    $arrayData['whatsapp_template_name'] = $whatsappTemplateName;
                 }
                 $this->db->insert('bulk_sms_email', $arrayData);
                 set_alert('success', translate('message_sent_successfully'));
                 if ($messageType == 1) {
                     $url = base_url('sendsmsmail/sms');
-                } else {
+                } elseif ($messageType == 2) {
                     $url = base_url('sendsmsmail/email');
+                } else {
+                    $url = base_url('sendsmsmail/whatsapp');
                 }
                 $array = array('status' => 'success', 'url' => $url, 'error' => '');
             } else {
                 $error = $this->form_validation->error_array();
+                log_message('error', 'Form validation failed. Errors: ' . json_encode($error));
                 $array = array('status' => 'fail', 'url' => '', 'error' => $error);
             }
             echo json_encode($array);
@@ -320,9 +419,9 @@ class Sendsmsmail extends Admin_Controller
     public function template()
     {
         $type = html_escape($this->uri->segment(3));
-        $typeA = array('email', 'sms');
+        $typeA = array('email', 'sms', 'whatsapp');
         $result = in_array($type, $typeA);
-        $type_n = ($type == 'sms' ? 1 : 2);
+        $type_n = ($type == 'sms' ? 1 : ($type == 'email' ? 2 : 3));
         if (!get_permission('sendsmsmail_template', 'is_view') || !$result) {
             access_denied();
         }
@@ -368,9 +467,9 @@ class Sendsmsmail extends Admin_Controller
     // edit send sms mail template
     public function template_edit($type = '', $id)
     {
-        $typeA = array('email', 'sms');
+        $typeA = array('email', 'sms', 'whatsapp');
         $result = in_array($type, $typeA);
-        $type_n = ($type == 'sms' ? 1 : 2);
+        $type_n = ($type == 'sms' ? 1 : ($type == 'email' ? 2 : 3));
 
         if (!get_permission('sendsmsmail_template', 'is_edit') || !$result) {
             access_denied();
@@ -513,8 +612,8 @@ class Sendsmsmail extends Admin_Controller
     public function getTemplateByBranch()
     {
         $html = "";
-        $type = $this->input->post('type');
-        $type = ($type == 'sms' ? 1 : 2);
+        $type_post = $this->input->post('type');
+        $type = ($type_post == 'sms' ? 1 : ($type_post == 'email' ? 2 : 3));
         $branch_id = $this->application_model->get_branch_id();
         if (!empty($branch_id)) {
             $result = $this->db->select('id,name')->where(array('branch_id' => $branch_id, 'type' => $type))->get('bulk_msg_category')->result_array();

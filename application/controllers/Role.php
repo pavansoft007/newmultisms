@@ -147,4 +147,67 @@ class Role extends Admin_Controller
         $this->data['main_menu'] = 'settings';
         $this->load->view('layout/index', $this->data);
     }
+
+    // Role Groups Management
+    public function groups()
+    {
+        $this->data['role_groups'] = $this->role_model->getRoleGroups();
+        $this->data['roles'] = $this->role_model->getRoleList();
+        $this->data['title'] = 'Role Groups';
+        $this->data['sub_page'] = 'role/groups';
+        $this->data['main_menu'] = 'settings';
+        $this->load->view('layout/index', $this->data);
+    }
+
+    public function group_add()
+    {
+        if ($this->input->post()) {
+            $data = [
+                'name' => $this->input->post('name'),
+                'description' => $this->input->post('description'),
+            ];
+            $group_id = $this->role_model->saveRoleGroup($data);
+            $role_ids = $this->input->post('role_ids') ?: [];
+            $this->role_model->setRolesForGroup($group_id, $role_ids);
+            set_alert('success', 'Role Group saved successfully.');
+            redirect(base_url('role/groups'));
+        }
+        $this->data['roles'] = $this->role_model->getRoleList();
+        $this->data['title'] = 'Add Role Group';
+        $this->data['sub_page'] = 'role/group_add';
+        $this->data['main_menu'] = 'settings';
+        $this->load->view('layout/index', $this->data);
+    }
+
+    public function group_edit($id)
+    {
+        $group = $this->role_model->getRoleGroup($id);
+        if (!$group) redirect(base_url('role/groups'));
+        if ($this->input->post()) {
+            $data = [
+                'id' => $id,
+                'name' => $this->input->post('name'),
+                'description' => $this->input->post('description'),
+            ];
+            $this->role_model->saveRoleGroup($data);
+            $role_ids = $this->input->post('role_ids') ?: [];
+            $this->role_model->setRolesForGroup($id, $role_ids);
+            set_alert('success', 'Role Group updated successfully.');
+            redirect(base_url('role/groups'));
+        }
+        $this->data['group'] = $group;
+        $this->data['roles'] = $this->role_model->getRoleList();
+        $this->data['assigned_roles'] = array_column($this->role_model->getRolesByGroup($id), 'id');
+        $this->data['title'] = 'Edit Role Group';
+        $this->data['sub_page'] = 'role/group_edit';
+        $this->data['main_menu'] = 'settings';
+        $this->load->view('layout/index', $this->data);
+    }
+
+    public function group_delete($id)
+    {
+        $this->role_model->deleteRoleGroup($id);
+        set_alert('success', 'Role Group deleted successfully.');
+        redirect(base_url('role/groups'));
+    }
 }

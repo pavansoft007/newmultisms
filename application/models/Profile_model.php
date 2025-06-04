@@ -23,7 +23,8 @@ class Profile_model extends MY_Model
             'mobileno' => $data['mobile_no'],
             'present_address' => $data['present_address'],
             'permanent_address' => $data['permanent_address'],
-            'photo' => $this->uploadImage('staff'),
+            // Only upload if a new file is selected
+            'photo' => !empty($_FILES["user_photo"]["name"]) ? $this->uploadImage('staff') : $data['old_user_photo'],
             'email' => $data['email'],
             'facebook_url' => $data['facebook'],
             'linkedin_url' => $data['linkedin'],
@@ -42,7 +43,6 @@ class Profile_model extends MY_Model
 
     public function studentUpdate($data)
     {
-        
         $arrData = array();
         if (isset($data['admission_date'])) {
             $arrData['admission_date'] = date("Y-m-d", strtotime($data['admission_date']));
@@ -86,10 +86,12 @@ class Profile_model extends MY_Model
         if (isset($data['state'])) {
             $arrData['state'] = $data['state'];
         }
-        if (isset($_FILES["user_photo"]) && empty($_FILES["user_photo"]['name'])) {
+        // Only upload if a new file is selected
+        if (!empty($_FILES["user_photo"]["name"])) {
             $arrData['photo'] = $this->uploadImage('student');
+        } else {
+            $arrData['photo'] = $data['old_user_photo'];
         }
-
         $previous_details = array(
             'school_name' => $this->input->post('school_name'),
             'qualification' => $this->input->post('qualification'),
@@ -100,11 +102,9 @@ class Profile_model extends MY_Model
         } else {
             $previous_details = json_encode($previous_details);
         }
-
         if (isset($data['school_name'])) {
             $arrData['previous_details'] = $previous_details;
         }
-
         // update student all information in the database
         $this->db->where('id', get_loggedin_user_id());
         $this->db->update('student', $arrData);
@@ -126,12 +126,12 @@ class Profile_model extends MY_Model
             'address' => $data['address'],
             'city' => $data['city'],
             'state' => $data['state'],
-            'photo' => $this->uploadImage('parent'),
+            // Only upload if a new file is selected
+            'photo' => !empty($_FILES["user_photo"]["name"]) ? $this->uploadImage('parent') : $data['old_user_photo'],
             'facebook_url' => $data['facebook'],
             'linkedin_url' => $data['linkedin'],
             'twitter_url' => $data['twitter'],
         );
-
         // UPDATE ALL INFORMATION IN THE DATABASE
         $this->db->where('id', get_loggedin_user_id());
         $this->db->update('parent', $update_data);
