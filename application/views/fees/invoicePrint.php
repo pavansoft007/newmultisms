@@ -67,89 +67,70 @@ if (count($student_array)) {
                             </address>
 				</div>
 			</div>
-			<div class="col-xs-6">
-				<div class="bill-data text-right">
-					<p class="h5 mb-xs text-dark text-weight-semibold">Academic :</p>
-					<address>
-						<?php 
-						echo $basic['school_name'] . "<br/>";
-						echo $basic['school_address'] . "<br/>";
-						echo $basic['school_mobileno'] . "<br/>";
-						echo $basic['school_email'] . "<br/>";
-						?>
-					</address>
-				</div>
-			</div>
+			
 		</div>
 	</div>
 
 	<div class="table-responsive br-none">
 		<table class="table invoice-items table-hover mb-none">
 			<thead>
-				<tr class="text-dark">
-					<th id="cell-id" class="text-weight-semibold">#</th>
-					<th id="cell-item" class="text-weight-semibold"><?=translate("fees_type")?></th>
-					<th id="cell-id" class="text-weight-semibold"><?=translate("due_date")?></th>
-					<th id="cell-price" class="text-weight-semibold"><?=translate("status")?></th>
-					<th id="cell-price" class="text-weight-semibold"><?=translate("amount")?></th>
-					<th id="cell-price" class="text-weight-semibold"><?=translate("discount")?></th>
-					<th id="cell-price" class="text-weight-semibold"><?=translate("fine")?></th>
-					<th id="cell-price" class="text-weight-semibold"><?=translate("paid")?></th>
-					<th id="cell-total" class="text-center text-weight-semibold"><?=translate("balance")?></th>
-				</tr>
-			</thead>
-			<tbody>
-				<?php
-					$count = 1;
-					$total_fine = 0;
-					$total_discount = 0;
-					$total_paid = 0;
-					$total_balance = 0;
-					$total_amount = 0;
-					$typeData = array('' => translate('select'));
-					$allocations = $this->fees_model->getInvoiceDetails($basic['id']);
-					foreach ($allocations as $row) {
-						$deposit = $this->fees_model->getStudentFeeDeposit($row['allocation_id'], $row['fee_type_id']);
-						$type_discount = $deposit['total_discount'];
-						$type_fine = $deposit['total_fine'];
-						$type_amount = $deposit['total_amount'];
-						$balance = $row['amount'] - ($type_amount + $type_discount);
-						$total_discount += $type_discount;
-						$total_fine += $type_fine;
-						$total_paid += $type_amount;
-						$total_balance += $balance;
-						$total_amount += $row['amount'];
-						if ($balance != 0) {
-						 	$typeData[$row['allocation_id'] . "|" . $row['fee_type_id']] = $row['name'];
-						}
-					?>
-				<tr>
-					<td><?php echo $count++;?></td>
-					<td class="text-weight-semibold text-dark"><?=$row['name']?></td>
-					<td><?=_d($row['due_date'])?></td>
-					<td><?php 
-						$status = 0;
-						$labelmode = '';
-						if($type_amount == 0) {
-							$status = translate('unpaid');
-							$labelmode = 'label-danger-custom';
-						} elseif($balance == 0) {
-							$status = translate('total_paid');
-							$labelmode = 'label-success-custom';
-						} else {
-							$status = translate('partly_paid');
-							$labelmode = 'label-info-custom';
-						}
-						echo "<span class='label ".$labelmode." '>".$status."</span>";
-					?></td>
-					<td><?php echo $currency_symbol . $row['amount'];?></td>
-					<td><?php echo $currency_symbol . $type_discount;?></td>
-					<td><?php echo $currency_symbol . $type_fine;?></td>
-					<td><?php echo $currency_symbol . $type_amount;?></td>
-					<td class="text-center"><?php echo $currency_symbol . number_format($balance, 2, '.', '');?></td>
-				</tr>
-				<?php } ?>
-			</tbody>
+<tr class="text-dark">
+<th id="cell-id" class="text-weight-semibold">#</th>
+<th id="cell-item" class="text-weight-semibold"><?=translate("fees_type")?></th>
+<th id="cell-id" class="text-weight-semibold"><?=translate("due_date")?></th>
+<th id="cell-price" class="text-weight-semibold"><?=translate("status")?></th>
+<th id="cell-price" class="text-weight-semibold"><?=translate("amount")?></th>
+<?php if ($total_discount >= 1): ?>
+<th id="cell-price" class="text-weight-semibold"><?=translate("discount")?></th>
+<?php endif; ?>
+<?php if ($total_fine >= 1): ?>
+<th id="cell-price" class="text-weight-semibold"><?=translate("fine")?></th>
+<?php endif; ?>
+<th id="cell-price" class="text-weight-semibold"><?=translate("paid")?></th>
+<th id="cell-total" class="text-center text-weight-semibold"><?=translate("balance")?></th>
+</tr>
+</thead>
+<tbody>
+<?php
+$count = 1;
+foreach ($allocations as $row) {
+$deposit = $this->fees_model->getStudentFeeDeposit($row['allocation_id'], $row['fee_type_id']);
+$type_discount = $deposit['total_discount'];
+$type_fine = $deposit['total_fine'];
+$type_amount = $deposit['total_amount'];
+$balance = $row['amount'] - ($type_amount + $type_discount);
+?>
+<tr>
+<td><?php echo $count++;?></td>
+<td class="text-weight-semibold text-dark"><?=$row['name']?></td>
+<td><?=_d($row['due_date'])?></td>
+<td><?php 
+$status = 0;
+$labelmode = '';
+if($type_amount == 0) {
+$status = translate('unpaid');
+$labelmode = 'label-danger-custom';
+} elseif($balance == 0) {
+$status = translate('total_paid');
+$labelmode = 'label-success-custom';
+} else {
+$status = translate('partly_paid');
+$labelmode = 'label-info-custom';
+}
+echo "<span class='label ".$labelmode." '>>".$status."</span>";
+?></td>
+<td><?php echo $currency_symbol . $row['amount'];?></td>
+<?php if ($total_discount >= 1): ?>
+<td><?php echo $currency_symbol . $type_discount;?></td>
+<?php endif; ?>
+<?php if ($total_fine >= 1): ?>
+<td><?php echo $currency_symbol . $type_fine;?></td>
+<?php endif; ?>
+<td><?php echo $currency_symbol . $type_amount;?></td>
+<td class="text-center"><?php echo $currency_symbol . number_format($balance, 2, '.', '');?></td>
+</tr>
+<?php } ?>
+</tbody>
 		</table>
 	</div>
 	<div class="invoice-summary text-right mt-lg">
@@ -157,11 +138,15 @@ if (count($student_array)) {
 			<div class="col-lg-5 pull-right">
 				<ul class="amounts">
 					<li><strong><?=translate('grand_total')?> :</strong> <?=$currency_symbol . number_format($total_amount, 2, '.', ''); ?></li>
+					<?php if ($total_discount >= 1): ?>
 					<li><strong><?=translate('discount')?> :</strong> <?=$currency_symbol . number_format($total_discount, 2, '.', ''); ?></li>
+					<?php endif; ?>
 					<li><strong><?=translate('paid')?> :</strong> <?=$currency_symbol . number_format($total_paid, 2, '.', ''); ?></li>
+					<?php if ($total_fine >= 1): ?>
 					<li><strong><?=translate('fine')?> :</strong> <?=$currency_symbol . number_format($total_fine, 2, '.', ''); ?></li>
+					<?php endif; ?>
 					<?php if ($total_balance != 0): ?>
-					<li><strong><?=translate('total_paid')?> (with fine) :</strong> <?=$currency_symbol . number_format($total_paid + $total_fine, 2, '.', ''); ?></li>
+					<li><strong><?=translate('total_paid')?></strong> <?=$currency_symbol . number_format($total_paid + $total_fine, 2, '.', ''); ?></li>
 					<li>
 						<strong><?=translate('balance')?> : </strong> 
 						<?php

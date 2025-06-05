@@ -487,7 +487,7 @@ if (isset($basic['id']) && $invoice['status'] != 'unpaid') {
                                     </div>
                                 </div>
                           <div class="col-xs-6 school-details-column" style="text-align: center; word-wrap: break-word; max-width: 100%;">
-                                    <div style="font-size: 17px; font-weight: 700; color: #FF0000;">
+                                    <div style="font-size: 20px; font-weight: 700; color: #FF0000;">
                                         <?php echo htmlspecialchars($basic['school_name']); ?>
                                     </div>
                                     <p style="font-size: 11px; font-weight: normal; margin: 2px 0;">
@@ -565,12 +565,12 @@ if (isset($basic['id']) && $invoice['status'] != 'unpaid') {
                                         <th class="text-weight-semibold"><?=translate("due_date")?></th>
                                         <th class="text-weight-semibold"><?=translate("status")?></th>
                                         <th class="text-weight-semibold"><?=translate("amount")?></th>
-                                        <?php if ($_overall_invoice_summary_discount >= 1): ?>
-                                        <th class="text-weight-semibold"><?=translate("discount")?></th>
-                                        <?php endif; ?>
-                                        <?php if ($_overall_invoice_summary_fine >= 1): ?>
-                                        <th class="text-weight-semibold"><?=translate("fine")?></th>
-                                        <?php endif; ?>
+                                        <?php if ($total_discount >= 1): ?>
+<th id="cell-price" class="text-weight-semibold"><?=translate("discount")?></th>
+<?php endif; ?>
+<?php if ($total_fine >= 1): ?>
+<th id="cell-price" class="text-weight-semibold"><?=translate("fine")?></th>
+<?php endif; ?>
                                         <th class="text-weight-semibold"><?=translate("paid")?></th>
                                         <th class="text-center text-weight-semibold"><?=translate("balance")?></th>
                                     </tr>
@@ -726,11 +726,17 @@ if (isset($basic['id']) && $invoice['status'] != 'unpaid') {
                                     </div>
                                 </div>
                            
-                             <div class="col-xs-6 school-details-column" style="font-size: 17px; line-height: 1; text-align: center; word-wrap: break-word; max-width: 100%; font-weight: 700; color: #FF0000;">
-                                    <?php echo htmlspecialchars($basic['school_name']); ?>
-                                    <p><?php echo htmlspecialchars($basic['school_address']); ?></p>
-                                    <p><?php echo htmlspecialchars($basic['school_mobileno']); ?></p>
-                                </div>
+                            <div class="col-xs-6 school-details-column" style="text-align: center; word-wrap: break-word; max-width: 100%;">
+                                    <div style="font-size: 20px; font-weight: 700; color: #FF0000;">
+                                        <?php echo htmlspecialchars($basic['school_name']); ?>
+                                    </div>
+                                    <p style="font-size: 11px; font-weight: normal; margin: 2px 0;">
+                                        <?php echo htmlspecialchars($basic['school_address']); ?>
+                                    </p>
+                                    <p style="font-size: 11px; font-weight: normal; margin: 2px 0;">
+                                        <?php echo htmlspecialchars($basic['school_mobileno']); ?>
+                                    </p>
+                                </div>
                                 <div class="col-xs-3 text-right">
                                     <h4 class="mt-none mb-none text-dark">Invoice No #<?php echo htmlspecialchars($invoice['invoice_no']); ?></h4>
                                     <p class="mb-none">
@@ -762,15 +768,15 @@ if (isset($basic['id']) && $invoice['status'] != 'unpaid') {
                             <div class="row">
                                 <div class="col-xs-6">
                                     <div class="bill-data">
-                                        <p class="h5 mb-xs text-dark text-weight-semibold">Invoice To :</p>
-                                        <address style="font-style: normal;">
-                                            <?php 
-                                            echo htmlspecialchars($basic['first_name'] . ' '. $basic['last_name']) . '<br>';
-                                            echo (empty($basic['student_address']) ? "" : nl2br(htmlspecialchars($basic['student_address'])) . '<br>');
-                                            echo translate('class').' : '. htmlspecialchars($basic['class_name']) . '<br>';
-                                            echo translate('email').' : '. htmlspecialchars($basic['student_email']); 
-                                            ?>
-                                        </address>
+                                    <address style="font-style: normal;">
+                                <?php 
+                                    echo '<strong>' . translate('Student Name') . ' :</strong> ' . htmlspecialchars($basic['first_name'] . ' ' . $basic['last_name']) . '<br>';
+                                    echo '<strong>' . translate('Class') . ' :</strong> ' . htmlspecialchars($basic['class_name']) . '<br>';
+                                    echo '<strong>' . translate('Section') . ' :</strong> ' . htmlspecialchars($basic['section_name']) . '<br>'; 
+                                    echo '<strong>' . translate('Phone Number') . ' :</strong> ' . htmlspecialchars($basic['guardian_phone']) . '<br>'; 
+                                    echo '<strong>' . translate('Parent Name') . ' :</strong> ' . htmlspecialchars($basic['guardian_name']) . '<br>'; 
+                                ?>
+                            </address>
                                     </div>
                                 </div>
                                 <!-- <div class="col-xs-6"> 
