@@ -56,14 +56,15 @@ if (count($student_array)) {
 			<div class="col-xs-6">
 				<div class="bill-data">
 					<p class="h5 mb-xs text-dark text-weight-semibold">Invoice To :</p>
-					<address>
-						<?php 
-						echo $basic['first_name'] . ' ' . $basic['last_name'] . '<br>';
-						echo $basic['student_address'] . '<br>';
-						echo translate('class') . ' : ' . $basic['class_name'] . '<br>';
-						echo translate('email') . ' : ' . $basic['student_email']; 
-						?>
-					</address>
+				     <address style="font-style: normal;">
+                                <?php 
+                                    echo '<strong>' . translate('Student Name') . ' :</strong> ' . htmlspecialchars($basic['first_name'] . ' ' . $basic['last_name']) . '<br>';
+                                    echo '<strong>' . translate('Class') . ' :</strong> ' . htmlspecialchars($basic['class_name']) . '<br>';
+                                    echo '<strong>' . translate('Section') . ' :</strong> ' . htmlspecialchars($basic['section_name']) . '<br>'; 
+                                    echo '<strong>' . translate('Phone Number') . ' :</strong> ' . htmlspecialchars($basic['guardian_phone']) . '<br>'; 
+                                    echo '<strong>' . translate('Parent Name') . ' :</strong> ' . htmlspecialchars($basic['guardian_name']) . '<br>'; 
+                                ?>
+                            </address>
 				</div>
 			</div>
 			<div class="col-xs-6">

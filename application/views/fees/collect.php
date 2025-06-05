@@ -486,12 +486,18 @@ if (isset($basic['id']) && $invoice['status'] != 'unpaid') {
                                         <img src="<?=$this->application_model->getBranchImage($basic['branch_id'], 'printing-logo')?>" alt="School Logo" onerror="this.onerror=null;this.src='https://placehold.co/150x70/cccccc/000000?text=Logo';" />
                                     </div>
                                 </div>
-                            <div class="col-xs-6 school-details-column" style="font-size: 17px; line-height: 1; text-align: center; word-wrap: break-word; max-width: 100%; font-weight: 700; color: #FF0000;">
-                                    <?php echo htmlspecialchars($basic['school_name']); ?>
-                                    <p><?php echo htmlspecialchars($basic['school_address']); ?></p>
-                                    <p><?php echo htmlspecialchars($basic['school_mobileno']); ?></p>
-                                    <p><?php echo htmlspecialchars($basic['school_email']); ?></p>
-                                </div>
+                          <div class="col-xs-6 school-details-column" style="text-align: center; word-wrap: break-word; max-width: 100%;">
+                                    <div style="font-size: 17px; font-weight: 700; color: #FF0000;">
+                                        <?php echo htmlspecialchars($basic['school_name']); ?>
+                                    </div>
+                                    <p style="font-size: 11px; font-weight: normal; margin: 2px 0;">
+                                        <?php echo htmlspecialchars($basic['school_address']); ?>
+                                    </p>
+                                    <p style="font-size: 11px; font-weight: normal; margin: 2px 0;">
+                                        <?php echo htmlspecialchars($basic['school_mobileno']); ?>
+                                    </p>
+                                </div>
+
                                 <div class="col-xs-3 text-right">
                                     <h4 class="mt-none mb-none text-dark">Invoice No #<?=htmlspecialchars($invoice['invoice_no'])?></h4>
                                     <p class="mb-none">
@@ -523,14 +529,17 @@ if (isset($basic['id']) && $invoice['status'] != 'unpaid') {
                                 <div class="col-xs-6">
                                     <div class="bill-data">
                                         <p class="h5 mb-xs text-dark text-weight-semibold">Invoice To :</p>
-                                        <address style="font-style: normal;">
-                                            <?php 
-                                            echo htmlspecialchars($basic['first_name'] . ' ' . $basic['last_name']) . '<br>';
-                                            echo (empty($basic['student_address']) ? "" : nl2br(htmlspecialchars($basic['student_address'])) . '<br>');
-                                            echo translate('class') . ' : ' . htmlspecialchars($basic['class_name']) . '<br>';
-                                            echo translate('email') . ' : ' . htmlspecialchars($basic['student_email']); 
-                                            ?>
-                                        </address>
+                               <address style="font-style: normal;">
+                                <?php 
+                                    echo '<strong>' . translate('Student Name') . ' :</strong> ' . htmlspecialchars($basic['first_name'] . ' ' . $basic['last_name']) . '<br>';
+                                    echo '<strong>' . translate('Class') . ' :</strong> ' . htmlspecialchars($basic['class_name']) . '<br>';
+                                    echo '<strong>' . translate('Section') . ' :</strong> ' . htmlspecialchars($basic['section_name']) . '<br>'; 
+                                    echo '<strong>' . translate('Phone Number') . ' :</strong> ' . htmlspecialchars($basic['guardian_phone']) . '<br>'; 
+                                    echo '<strong>' . translate('Parent Name') . ' :</strong> ' . htmlspecialchars($basic['guardian_name']) . '<br>'; 
+                                ?>
+                            </address>
+
+
                                     </div>
                                 </div>
                                 <div class="col-xs-4 text-right"> </div> </div>
@@ -721,7 +730,6 @@ if (isset($basic['id']) && $invoice['status'] != 'unpaid') {
                                     <?php echo htmlspecialchars($basic['school_name']); ?>
                                     <p><?php echo htmlspecialchars($basic['school_address']); ?></p>
                                     <p><?php echo htmlspecialchars($basic['school_mobileno']); ?></p>
-                                    <p><?php echo htmlspecialchars($basic['school_email']); ?></p>
                                 </div>
                                 <div class="col-xs-3 text-right">
                                     <h4 class="mt-none mb-none text-dark">Invoice No #<?php echo htmlspecialchars($invoice['invoice_no']); ?></h4>
@@ -773,7 +781,6 @@ if (isset($basic['id']) && $invoice['status'] != 'unpaid') {
                                             echo htmlspecialchars($basic['school_name']) . "<br/>";
                                             echo htmlspecialchars($basic['school_address']) . "<br/>";
                                             echo htmlspecialchars($basic['school_mobileno']) . "<br/>";
-                                            echo htmlspecialchars($basic['school_email']) . "<br/>";
                                             ?>
                                         </address>
                                     </div>
