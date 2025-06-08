@@ -156,7 +156,7 @@ class Student_model extends MY_Model
         }
     }
 
-    public function csvImport($row = array(), $classID = '', $sectionID = '', $branchID = '')
+    public function csvImport($row = array(), $classID = '', $sectionID = '', $branchID = '', $customFieldData = array())
     {
         // getting existing father data
         if ($row['GuardianUsername'] !== '') {
@@ -262,6 +262,11 @@ class Student_model extends MY_Model
             'session_id' => get_session_id(),
         );
         $this->db->insert('enroll', $arrayEnroll);
+
+        // Save custom fields if provided
+        if (!empty($customFieldData)) {
+            saveCustomFields($customFieldData, $studentID);
+        }
     }
 
     public function getFeeProgress($id)

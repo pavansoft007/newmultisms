@@ -282,6 +282,14 @@ class Student extends Admin_Controller
         }
 
         $branchID = $this->application_model->get_branch_id();
+        // Fetch custom fields for students in this branch
+        $customFieldsList = getCustomFields('student', $branchID);
+        $customFieldLabels = array();
+        $customFieldMap = array();
+        foreach ($customFieldsList as $cf) {
+            $customFieldLabels[$cf['field_label']] = $cf['id'];
+            $customFieldMap[$cf['id']] = $cf['field_label'];
+        }
         if (isset($_POST['save'])) {
             $err_msg = "";
             $i = 0;
@@ -315,11 +323,19 @@ class Student extends Admin_Controller
                             if ($r['status'] == false) {
                                 $err_msg .= $row['FirstName'] . ' ' . $row['LastName'] . " - Imported Failed : " . $r['message'] . "<br>";
                             } else {
-                                $this->student_model->csvImport($row, $classID, $sectionID, $branchID);
+                                // Collect custom field values from CSV row
+                                $customFieldData = array();
+                                foreach ($customFieldLabels as $label => $fieldId) {
+                                    if (isset($row[$label])) {
+                                        $customFieldData[$fieldId] = $row[$label];
+                                    }
+                                }
+                                $this->student_model->csvImport($row, $classID, $sectionID, $branchID, $customFieldData);
                                 $i++;
                             }
                         } else {
-                            set_alert('error', translate('invalid_csv_file'));
+                            $missing = implode(', ', $csv_chk);
+                            set_alert('error', 'Invalid / Corrupted CSV File. Missing or mismatched columns: ' . $missing);
                             redirect(base_url("student/csv_import"));
                         }
                     }
@@ -733,6 +749,8 @@ class Student extends Admin_Controller
     public function csvCheckExistsData($student_username = '', $roll = '', $registerno = '', $class_id = '', $section_id = '', $branchID = '', $unique_roll)
     {
         $array = array();
+        // Remove any unique check for FirstName/LastName
+        // Only check for unique roll, username, and register_no as before
         if (!empty($roll)) {
 
             if ($unique_roll != 0) {
