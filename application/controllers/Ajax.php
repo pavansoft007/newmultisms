@@ -175,6 +175,14 @@ class Ajax extends MY_Controller
         $classID = $this->input->post("class_id");
         $mode = $this->input->post("all");
         $multi = $this->input->post("multi");
+        
+        // If "All classes" is selected
+        if ($classID == 'all') {
+            $html .= '<option value="all">' . translate('all_sections') . '</option>';
+            echo $html;
+            return;
+        }
+        
         if (!empty($classID)) {
             $getClassTeacher = $this->app_lib->getClassTeacher($classID);
             if (is_array($getClassTeacher)) {

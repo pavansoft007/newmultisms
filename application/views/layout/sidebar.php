@@ -1,4 +1,4 @@
-<aside id="sidebar-left" class="sidebar-left">
+<aside id="sidebar-left" class="sidebar-left sidebar-gradient">
 	<div class="sidebar-header">
 		<div class="sidebar-title">
 			Main

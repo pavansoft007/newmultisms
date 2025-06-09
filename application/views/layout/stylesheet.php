@@ -14,6 +14,8 @@
 <link rel="stylesheet" href="<?php echo base_url('assets/css/custom-style.css');?>">
 <link rel="stylesheet" href="<?php echo base_url('assets/css/skins/default.css');?>">
 <link rel="stylesheet" href="<?php echo base_url('assets/vendor/sweetalert/sweetalert-custom.css');?>">
+<link rel="stylesheet" href="<?php echo base_url('assets2/css/sidebar-colors.css');?>">
+<link rel="stylesheet" href="<?php echo base_url('assets2/css/sidebar-gradient-colors.css');?>">
 
 <!-- jquery -->
 <script src="<?php echo base_url('assets/vendor/jquery/jquery.min.js');?>"></script>

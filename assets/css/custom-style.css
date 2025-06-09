@@ -153,10 +153,80 @@ html.fixed .content-body {
 	vertical-align: top;
 	width: 300px;
 	z-index: 1010;
-	-webkit-transition: width .25s ease-in-out;
-	-moz-transition: width .25s ease-in-out;
-	-o-transition: width .25s ease-in-out;
-	transition: width .25s ease-in-out;
+	-webkit-transition: all .25s ease-in-out;
+	-moz-transition: all .25s ease-in-out;
+	-o-transition: all .25s ease-in-out;
+	transition: all .25s ease-in-out;
+	/* Gradient Background */
+	background: linear-gradient(135deg, #3A3978 0%, #2d2d5e 100%) !important;
+	border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Sidebar Header Styling */
+.sidebar-left .sidebar-header {
+	background: rgba(0, 0, 0, 0.2);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Sidebar Title */
+.sidebar-left .sidebar-title {
+	color: rgba(255, 255, 255, 0.8);
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	font-size: 0.8rem;
+}
+
+/* Parent Menu Styling */
+.sidebar-left .nano-content > .nav-main > li > a {
+	color: #fff;
+	border-radius: 8px;
+	margin: 5px 10px;
+	transition: all 0.3s ease;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-left .nano-content > .nav-main > li > a:hover {
+	background: rgba(255, 255, 255, 0.1);
+	border-color: rgba(255, 255, 255, 0.3);
+	transform: translateY(-2px);
+}
+
+/* Active Parent Menu */
+.sidebar-left .nano-content > .nav-main > li.nav-active > a {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+	color: #fff;
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+	border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Child Menu Container */
+.sidebar-left .nano-content > .nav-main li .nav-children {
+	background-color: rgb(64, 16, 210)0.79;
+	border-radius: 8px;
+	margin: 0 15px 10px 15px;
+	padding: 5px;
+	border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Child Menu Items */
+.sidebar-left .nano-content > .nav-main li .nav-children li a {
+	color: rgba(255, 255, 255, 0.8);
+	border-radius: 6px;
+	margin: 2px 0;
+	transition: all 0.3s ease;
+}
+
+.sidebar-left .nano-content > .nav-main li .nav-children li a:hover {
+	background: rgba(255, 255, 255, 0.1);
+	color: #fff;
+}
+
+/* Active Child Menu Item */
+.sidebar-left .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a {
+	background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+	color: #fff;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
 
 .sidebar-left .nav-main a span {
@@ -343,6 +413,37 @@ html.fixed .content-body {
 		overflow-y: scroll;
 		overflow-x: hidden;
 		-webkit-overflow-scrolling: touch;
+	}
+	
+	/* Mobile Sidebar Styling */
+	.sidebar-left {
+		background: linear-gradient(135deg, #3A3978 0%, #2d2d5e 100%) !important;
+	}
+	
+	.sidebar-left .nano-content > .nav-main > li > a {
+		color: #fff;
+		border-radius: 8px;
+		margin: 5px 10px;
+	}
+	
+	.sidebar-left .nano-content > .nav-main > li.nav-active > a {
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+		color: #fff;
+	}
+	
+	.sidebar-left .nano-content > .nav-main li .nav-children {
+		background-color: rgba(48, 7, 228, 0.866);
+		border-radius: 8px;
+		margin: 0 15px 10px 15px;
+	}
+	
+	.sidebar-left .nano-content > .nav-main li .nav-children li a {
+		color: rgba(255, 255, 255, 0.8);
+	}
+	
+	.sidebar-left .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a {
+		background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+		color: #fff;
 	}
 
 	body {
@@ -12670,6 +12771,37 @@ html.dark .search-content .search-toolbar .nav-pills a:hover, html.dark .search-
 	border-bottom-color: #303030;
 	border-top-color: #303030;
 	color: #555;
+}
+
+/* Global Sidebar Gradient Override - Ensures application on all pages */
+.sidebar-left {
+	background: linear-gradient(135deg, #3A3978 0%, #2d2d5e 100%) !important;
+}
+
+.sidebar-left .sidebar-header {
+	background: rgba(0, 0, 0, 0.2) !important;
+}
+
+.sidebar-left .nano-content > .nav-main > li > a {
+	color: #fff !important;
+}
+
+.sidebar-left .nano-content > .nav-main > li.nav-active > a {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+	color: #fff !important;
+}
+
+.sidebar-left .nano-content > .nav-main li .nav-children {
+	background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.sidebar-left .nano-content > .nav-main li .nav-children li a {
+	color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.sidebar-left .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a {
+	background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+	color: #fff !important;
 }
 html.dark .search-content .search-toolbar .nav-pills li.active a, html.dark .search-content .search-toolbar .nav-pills li.active a:hover, html.dark .search-content .search-toolbar .nav-pills li.active a:focus {
 	color: #CCC;

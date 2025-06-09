@@ -31,6 +31,8 @@
 <script src="<?php echo base_url('assets/js/plug.init.js');?>"></script>
 <script src="<?php echo base_url('assets/js/app.js')?>"></script>
 <script src="<?php echo base_url('assets/js/app.fn.js')?>"></script>
+<script src="<?php echo base_url('assets2/js/sidebar-menu-colors.js')?>"></script>
+<script src="<?php echo base_url('assets2/js/apply-sidebar-gradients.js')?>"></script>
 
 
 

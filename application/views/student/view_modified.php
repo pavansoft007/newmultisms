@@ -61,9 +61,6 @@
 					<button class="btn btn-default btn-circle" id="student_bulk_delete" data-loading-text="<i class='fas fa-spinner fa-spin'></i> Processing">
 						<i class="fas fa-trash-alt"></i> <?=translate('bulk_delete')?>
 					</button>
-					<span id="student-count" class="badge badge-info" style="margin-left:10px;vertical-align:middle;">
-						<?= isset($students) ? count($students) : 0 ?> <?=translate('students')?>
-					</span>
 				</div>
 				<h4 class="panel-title"><i class="fas fa-user-graduate"></i> <?php echo translate('student_list');?></h4>
 			</header>

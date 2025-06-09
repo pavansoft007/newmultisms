@@ -3,6 +3,39 @@ $.extend(theme.PluginDatePicker.defaults, {
 	autoclose: true
 });
 
+// Apply gradient menu colors to sidebar
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply active menu highlighting
+    const applyGradientStyles = function() {
+        // Get active parent menu
+        const activeParent = document.querySelector('.sidebar-left .nav-main > li.nav-active > a');
+        if (activeParent) {
+            activeParent.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            activeParent.style.color = '#fff';
+            activeParent.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
+            activeParent.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+        }
+        
+        // Get active child menu
+        const activeChild = document.querySelector('.sidebar-left .nav-main li .nav-children li.nav-active:not(.nav-parent) > a');
+        if (activeChild) {
+            activeChild.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+            activeChild.style.color = '#fff';
+            activeChild.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.15)';
+        }
+    };
+    
+    // Apply styles immediately
+    applyGradientStyles();
+    
+    // Also apply when navigation or tabs change
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('a')) {
+            setTimeout(applyGradientStyles, 300);
+        }
+    });
+});
+
 (function($) {
 	'use strict';
 

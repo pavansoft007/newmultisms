@@ -1,0 +1,161 @@
+/* Sidebar Gradient Colors - Matching Mainmenu Cards Gradients */
+
+/* Base Sidebar Styling */
+html .sidebar-left {
+    transition: background 0.3s ease;
+}
+
+/* Apply gradient to sidebar */
+html .sidebar-left.sidebar-gradient {
+    background: linear-gradient(135deg, #3A3978 0%, #2d2d5e 100%) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html .sidebar-left.sidebar-gradient .sidebar-header {
+    background: rgba(58, 83, 225, 0.999);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html .sidebar-left.sidebar-gradient .nano-content {
+    background: transparent !important;
+}
+
+/* Parent Menu Styles */
+html .sidebar-left.sidebar-gradient .nano-content > .nav-main > li > a {
+    color: #fff;
+    border-radius: 8px;
+    margin: 5px 10px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+html .sidebar-left.sidebar-gradient .nano-content > .nav-main > li > a:hover {
+    background: rgba(4, 32, 245, 0.571);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Active Parent Menu */
+html .sidebar-left.sidebar-gradient .nano-content > .nav-main > li.nav-active > a {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(136, 7, 188, 0.668);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Child Menu Container */
+html .sidebar-left.sidebar-gradient .nano-content > .nav-main li .nav-children {
+    background-color: rgb(55, 97, 237);
+    border-radius: 8px;
+    margin: 0 15px 10px 15px;
+    padding: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Child Menu Items */
+html .sidebar-left.sidebar-gradient .nano-content > .nav-main li .nav-children li a {
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: 6px;
+    margin: 2px 0;
+    transition: all 0.3s ease;
+}
+
+html .sidebar-left.sidebar-gradient .nano-content > .nav-main li .nav-children li a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Active Child Menu Item */
+html .sidebar-left.sidebar-gradient .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(148, 7, 177, 0.707);
+}
+
+/* Sidebar Title */
+html .sidebar-left.sidebar-gradient .sidebar-title {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.8rem;
+    padding-left: 15px;
+}
+
+/* Gradient Variations */
+html .sidebar-left.sidebar-gradient-blue-purple {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+html .sidebar-left.sidebar-gradient-orange-red {
+    background: linear-gradient(135deg, #111150 0%, #f5576c 100%) !important;
+}
+
+html .sidebar-left.sidebar-gradient-green-teal {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+}
+
+html .sidebar-left.sidebar-gradient-purple-pink {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
+}
+
+html .sidebar-left.sidebar-gradient-cyan-blue {
+    background: linear-gradient(135deg, #21d4fd 0%, #b721ff 100%) !important;
+}
+
+html .sidebar-left.sidebar-gradient-indigo-purple {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%) !important;
+}
+
+html .sidebar-left.sidebar-gradient-emerald-green {
+    background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%) !important;
+}
+
+/* Menu Text Color Overrides for Gradients */
+html .sidebar-left.sidebar-gradient-purple-pink .nano-content > .nav-main > li > a,
+html .sidebar-left.sidebar-gradient-purple-pink .nano-content > .nav-main li .nav-children li a {
+    color: #333;
+}
+
+html .sidebar-left.sidebar-gradient-purple-pink .sidebar-title {
+    color: #333;
+}
+
+/* Active Menu Gradient Variations */
+/* Parent Active Menu */
+html .sidebar-left.sidebar-gradient-blue-purple .nano-content > .nav-main > li.nav-active > a {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+}
+
+html .sidebar-left.sidebar-gradient-orange-red .nano-content > .nav-main > li.nav-active > a {
+    background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%) !important;
+}
+
+html .sidebar-left.sidebar-gradient-green-teal .nano-content > .nav-main > li.nav-active > a {
+    background: linear-gradient(135deg, #4c12ed 0%, #f5576c 100%) !important;
+}
+
+/* Child Active Menu */
+html .sidebar-left.sidebar-gradient-blue-purple .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a {
+    background: linear-gradient(135deg, #320ec6 0%, #f5576c 100%) !important;
+}
+
+html .sidebar-left.sidebar-gradient-orange-red .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+html .sidebar-left.sidebar-gradient-green-teal .nano-content > .nav-main li .nav-children li.nav-active:not(.nav-parent) > a {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
+}
+
+/* Dark Mode Compatibility */
+html.dark .sidebar-left.sidebar-gradient,
+html.dark .sidebar-left.sidebar-gradient-blue-purple,
+html.dark .sidebar-left.sidebar-gradient-orange-red,
+html.dark .sidebar-left.sidebar-gradient-green-teal,
+html.dark .sidebar-left.sidebar-gradient-purple-pink,
+html.dark .sidebar-left.sidebar-gradient-cyan-blue,
+html.dark .sidebar-left.sidebar-gradient-indigo-purple,
+html.dark .sidebar-left.sidebar-gradient-emerald-green {
+    background: inherit !important;
+}

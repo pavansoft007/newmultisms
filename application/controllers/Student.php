@@ -516,7 +516,28 @@ class Student extends Admin_Controller
         if (isset($_POST['search'])) {
             $classID = $this->input->post('class_id');
             $sectionID = $this->input->post('section_id');
-            $this->data['students'] = $this->application_model->getStudentListByClassSection($classID, $sectionID, $branchID, false, true);
+            
+            // If "All classes" option is selected
+            if ($classID == 'all') {
+                // Get all students from all classes
+                $this->db->select('e.*, s.photo, CONCAT_WS(" ", s.first_name, s.last_name) as fullname, s.register_no, s.parent_id, s.email, s.mobileno, s.blood_group, s.birthday, s.admission_date, l.active, c.name as class_name, se.name as section_name, sc.name as category');
+                $this->db->from('enroll as e');
+                $this->db->join('student as s', 'e.student_id = s.id', 'inner');
+                $this->db->join('login_credential as l', 'l.user_id = s.id and l.role = 7', 'inner');
+                $this->db->join('class as c', 'e.class_id = c.id', 'left');
+                $this->db->join('section as se', 'e.section_id = se.id', 'left');
+                $this->db->join('student_category as sc', 'sc.id = s.category_id', 'left');
+                $this->db->where('e.branch_id', $branchID);
+                $this->db->where('e.session_id', get_session_id());
+                if ($sectionID != 'all') {
+                    $this->db->where('e.section_id', $sectionID);
+                }
+                $this->db->order_by('s.register_no', 'ASC');
+                $this->data['students'] = $this->db->get()->result_array();
+            } else {
+                // Get students from the selected class
+                $this->data['students'] = $this->application_model->getStudentListByClassSection($classID, $sectionID, $branchID, false, true);
+            }
         }
         $this->data['branch_id'] = $branchID;
         $this->data['title'] = translate('student_list');

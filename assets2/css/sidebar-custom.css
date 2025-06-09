@@ -148,3 +148,13 @@
     background-color: #007bff !important;
     color: #fff !important;
 }
+
+/* Custom background color for non-active sidebar child menu items */
+.nav-main .nav-children li:not(.nav-active) > a {
+    background-color: #f0f4ff !important; /* Custom color for non-active child menu */
+}
+
+/* Custom background color for non-active sidebar child menu items - with higher specificity */
+.sidebar-left .nano-content > .nav-main .nav-children li:not(.nav-active) > a {
+    background-color: #f0f4ff !important;
+}
