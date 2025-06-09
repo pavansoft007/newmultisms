@@ -149,27 +149,50 @@ class Sendsmsmail_model extends CI_Model
     public function sendWhatsApp($sendTo, $message, $name, $eMail = '') // eMail might not be needed but kept for consistency
     {
         $this->load->library('aisensy_whatsapp');
-        // Replace placeholders
-        $message = str_replace('{name}', $name, $message);
-        $message = str_replace('{email}', $eMail, $message); // If you use email in WA messages
-        $message = str_replace('{mobile_no}', $sendTo, $message);
 
-        // Example of sending a simple text message via Aisensy.
-        // You'll need to adjust this based on your Aisensy_whatsapp library's capabilities
-        // and whether you're sending template messages, interactive messages, etc.
-        // This might involve campaign IDs, template names, parameters for templates, etc.
-        // $templateName = 'your_template_name'; // If sending a template message
-        // $params = [$name, ...]; // Parameters for the template
-        // $response = $this->aisensy_whatsapp->send_template_message($sendTo, $templateName, $params);
+        // The '$message' parameter is assumed to be the AiSensy campaignName (template name).
+        $campaign_name = $message;
 
-        // For a generic text message (if supported and configured for your Aisensy account):
-        // This is a hypothetical method name. Check your Aisensy_whatsapp.php library.
-        $response = $this->aisensy_whatsapp->send_text_message($sendTo, $message);
+        // Construct template_params. Assumes AiSensy template uses placeholders like {{name}}, {{email}}, {{mobile_no}}.
+        // Adjust keys if your AiSensy template placeholders differ (e.g., {{1}}, {{variable_name}}).
+        $template_params = [];
+        if (!empty($name)) {
+            $template_params['name'] = $name;
+        }
+        if (!empty($eMail)) {
+            $template_params['email'] = $eMail;
+        }
+        // If your template uses a placeholder for the mobile number itself:
+        $template_params['mobile_no'] = $sendTo;
 
-        if ($response && isset($response['status']) && $response['status'] == 'success') { // Adjust based on actual response structure
+
+        // Call the correct method from Aisensy_whatsapp library
+        $response = $this->aisensy_whatsapp->send_message(
+            $sendTo,          // recipient_mobile_number
+            $campaign_name,   // campaign_name (template name)
+            $template_params  // template_params_list
+        );
+
+        if ($response && isset($response['status']) && $response['status'] == 'success') {
             return true;
         } else {
-            // Log error if possible: log_message('error', 'Aisensy WhatsApp sending failed: ' . print_r($response, true));
+            $log_parts = ['Aisensy WhatsApp sending failed.'];
+            if (isset($response['http_code'])) {
+                $log_parts[] = 'HTTP Code: ' . $response['http_code'];
+            }
+            // Use 'message' from response if available, which is common for API errors
+            if (isset($response['message']) && is_string($response['message'])) {
+                 $log_parts[] = 'API Message: ' . $response['message'];
+            }
+            // Include 'details' or 'response' if they exist and provide more context
+            if (isset($response['details'])) {
+                $log_parts[] = 'Details: ' . (is_array($response['details']) ? json_encode($response['details']) : $response['details']);
+            } elseif (isset($response['response'])) {
+                 $log_parts[] = 'Response Data: ' . (is_array($response['response']) ? json_encode($response['response']) : $response['response']);
+            } elseif (isset($response['raw_response'])) { // From Aisensy_whatsapp library for unexpected formats
+                $log_parts[] = 'Raw Response: ' . $response['raw_response'];
+            }
+            log_message('error', implode(' ', $log_parts));
             return false;
         }
     }
