@@ -1407,6 +1407,11 @@
                                 </a>
                             </li>
                             <?php } ?>
+                            <li class="<?php if ($sub_page == 'api_settings/index') echo 'nav-active';?>">
+                                <a href="<?=base_url('api_settings/index')?>">
+                                    <span><i class="fas fa-caret-right" aria-hidden="true"></i><?=translate('api_key_settings')?></span>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     <?php } ?>
