@@ -29,7 +29,6 @@ class Profile extends Admin_Controller
         $this->load->model('profile_model');
         $this->load->model('email_model');
         $this->load->model('student_fields_model');
-        $this->data = array();
     }
 
     public function index()
@@ -164,7 +163,7 @@ class Profile extends Admin_Controller
                 $this->form_validation->set_rules('twitter', 'Twitter', 'trim|valid_url');
                 $this->form_validation->set_rules('linkedin', 'Linkedin', 'trim|valid_url');
                 $this->form_validation->set_rules('user_photo', 'profile_picture', 'callback_photoHandleUpload[user_photo]');
-                if ($this->form_validation->run() == true) {
+                if (sizeof($this->form_validation->error_array()) == 0) {
                     $data = $this->input->post();
                     $this->profile_model->staffUpdate($data);
                     set_alert('success', translate('information_has_been_updated_successfully'));

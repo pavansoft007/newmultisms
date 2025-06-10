@@ -47,15 +47,26 @@ class MY_Controller extends CI_Controller
 
     public function photoHandleUpload($str, $fields)
     {
-        $allowedExts = array_map('trim', array_map('strtolower', explode(',', $this->data['global_config']['image_extension'])));
+        // Ensure global_config is set
+        if (!isset($this->data['global_config']) || !is_array($this->data['global_config'])) {
+            $get_config = $this->db->get_where('global_settings', array('id' => 1))->row_array();
+            $this->data['global_config'] = $get_config;
+        }
+        // Fallback if image_extension is empty
+        $imageExtSetting = isset($this->data['global_config']['image_extension']) && $this->data['global_config']['image_extension'] !== ''
+            ? $this->data['global_config']['image_extension']
+            : 'jpg,jpeg,png,gif';
+        $allowedExts = array_map('trim', array_map('strtolower', explode(',', $imageExtSetting)));
         $allowedSizeKB = $this->data['global_config']['image_size'];
         $allowedSize = floatval(1024 * $allowedSizeKB);
         if (isset($_FILES["$fields"]) && !empty($_FILES["$fields"]['name'])) {
             $file_size = $_FILES["$fields"]["size"];
             $file_name = $_FILES["$fields"]["name"];
-            $extension = pathinfo($file_name, PATHINFO_EXTENSION);
+            $extension = strtolower(trim(pathinfo($file_name, PATHINFO_EXTENSION)));
+            // Debug: Uncomment the next line to log allowed extensions and file extension
+            // error_log("Allowed: " . implode(',', $allowedExts) . " | Uploaded: " . $extension);
             if ($files = filesize($_FILES["$fields"]['tmp_name'])) {
-                if (!in_array(strtolower($extension), $allowedExts)) {
+                if (empty($extension) || !in_array($extension, $allowedExts)) {
                     $this->form_validation->set_message('photoHandleUpload', translate('this_file_type_is_not_allowed'));
                     return false;
                 }
