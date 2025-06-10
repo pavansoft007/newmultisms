@@ -5918,99 +5918,59 @@ html:not(.sidebar-left-collapsed).boxed .call-to-action .call-to-action-btn > sp
 }
 
 .loading-overlay-showing {
-	overflow: hidden;
+  overflow: hidden;
 }
 
 .loading-overlay-showing > .loading-overlay {
-	opacity: 1;
-	visibility: visible;
+  opacity: 1;
+  visibility: visible;
 }
 
 .loading-overlay {
-	transition: visibility 0s ease-in-out 0.5s, opacity 0.5s ease-in-out;
-	bottom: 0;
-	left: 0;
-	position: absolute;
-	opacity: 0;
-	right: 0;
-	top: 0;
-	visibility: hidden;
+  transition: visibility 0s ease-in-out 0.5s, opacity 0.5s ease-in-out;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 999999;
+  background-color: rgba(18, 18, 18, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.loading-overlay.dark {
-	background: #383838;
+.spinner-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
 }
 
-.loading-overlay.light {
-	background: #FFF;
+.dot-loader {
+  --d: 22px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  color: #6750A4; /* Using your existing purple color */
+  box-shadow: 
+    calc(1*var(--d))      calc(0*var(--d))     0 0,
+    calc(0.707*var(--d))  calc(0.707*var(--d)) 0 1px,
+    calc(0*var(--d))      calc(1*var(--d))     0 2px,
+    calc(-0.707*var(--d)) calc(0.707*var(--d)) 0 3px,
+    calc(-1*var(--d))     calc(0*var(--d))     0 4px,
+    calc(-0.707*var(--d)) calc(-0.707*var(--d))0 5px,
+    calc(0*var(--d))      calc(-1*var(--d))    0 6px;
+  animation: l27 1s infinite steps(8);
 }
 
-body > .loading-overlay {
-	position: fixed;
-	z-index: 999999;
-}
-
-/* ring Loading */
-.ring-loader {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	-webkit-transform: translate(-50%,-50%); 
-	transform: translate(-50%,-50%); 
-	width: 150px;
-	height: 150px;
-	background: transparent;
-	border: 3px solid #3c3c3c;
-	border-radius: 50%;
-	text-align: center;
-	line-height: 150px;
-	font-family: sans-serif;
-	font-size: 20px;
-	color: #fff000;
-	letter-spacing:4px;
-	text-transform: uppercase;
-	text-shadow:0 0 10px #fff000;
-	box-shadow: 0 0 20px rgba(0, 0, 0, 0.39);
-}
-
-.ring-loader:before {
-	content: '';
-	position: absolute;
-	top: -3px;
-	left: -3px;
-	width: 100%;
-	height: 100%;
-	border: 3px solid transparent;
-	border-top: 3px solid #fff000;
-	border-right: 3px solid #fff000;
-	border-radius: 50%;
-	-webkit-animation: animateCircle 2s linear infinite;
-	animation: animateCircle 2s linear infinite;
-}
-
-.ring-loader span {
-	display: block;
-	position: absolute;
-	top: calc(50% - 2px);
-	left: 50%;
-	width: 50%;
-	height: 4px;
-	background: transparent;
-	transform-origin:left;
-	-webkit-animation: animate 2s linear infinite;
-	animation: animate 2s linear infinite;
-}
-
-.ring-loader span:before {
-	content:'';
-	position: absolute;
-	width: 16px;
-	height: 16px;
-	border-radius: 50%;
-	background-color: #fff000;
-	top: -6px;
-	right: -8px;
-	box-shadow: 0 0 20px #fff000;
+@keyframes l27 {
+  100% { transform: rotate(1turn); }
 }
 
 @keyframes animateCircle

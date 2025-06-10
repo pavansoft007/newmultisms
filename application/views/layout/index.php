@@ -6,10 +6,10 @@
 <!-- <body class="loading-overlay-showing" data-loading-overlay> -->
 <?php if ($global_config['preloader_backend'] == 1) { ?>
 <body class="loading-overlay-showing" data-loading-overlay>
-	<!-- page preloader -->
-	<div class="loading-overlay dark">
-		<div class="ring-loader">
-			Loading <span></span>
+	<!-- Advanced Page Preloader -->
+	<div class="loading-overlay">
+		<div class="spinner-container">
+			<div class="dot-loader"></div>
 		</div>
 	</div>
 <?php } else { ?>
