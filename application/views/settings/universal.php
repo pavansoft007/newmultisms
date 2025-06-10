@@ -31,7 +31,22 @@
 
 		<div class="tab-content">
 			<div class="tab-pane box <?=(empty($this->session->flashdata('active')) ? 'active' : '');?>" id="setting">
-				<?php echo form_open($this->uri->uri_string(), array( 'class' 	=> 'validate form-horizontal form-bordered' )); ?>
+				<?php echo form_open($this->uri->uri_string() . ($is_superadmin ? '?branch_id=' . $selected_branch : ''), array( 'class' 	=> 'validate form-horizontal form-bordered' )); ?>
+				<?php if (!empty($is_superadmin) && $is_superadmin): ?>
+					<input type="hidden" name="branch_id" value="<?=$selected_branch?>">
+				<?php endif; ?>
+				<?php if (!empty($is_superadmin) && $is_superadmin): ?>
+				<div class="form-group">
+					<label class="col-md-3 control-label"><?=translate('branch')?></label>
+					<div class="col-md-6">
+						<select name="branch_id" class="form-control" onchange="window.location.search='branch_id='+this.value;">
+							<?php foreach ($branch_list as $branch): ?>
+								<option value="<?=$branch['id']?>" <?=$selected_branch == $branch['id'] ? 'selected' : ''?>><?=$branch['name']?></option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+				</div>
+				<?php endif; ?>
 				<div class="form-group">
 					<label class="col-md-3 control-label"><?=translate('institute_name')?></label>
 					<div class="col-md-6">
@@ -204,7 +219,10 @@
 			</div>
 
 			<div class="tab-pane box <?=($this->session->flashdata('active') == 2 ? 'active' : '');?>" id="theme">
-				<?php echo form_open($this->uri->uri_string(), array('class' => 'validate form-horizontal form-bordered')); ?>
+				<?php echo form_open($this->uri->uri_string() . ($is_superadmin ? '?branch_id=' . $selected_branch : ''), array('class' => 'validate form-horizontal form-bordered')); ?>
+				<?php if (!empty($is_superadmin) && $is_superadmin): ?>
+					<input type="hidden" name="branch_id" value="<?=$selected_branch?>">
+				<?php endif; ?>
 				<div class="form-group">
 					<label class="col-md-2 control-label" for="zoomcontrol">Theme</label>
 					<div class="col-md-8">
@@ -271,7 +289,10 @@
 				<?php echo form_close(); ?>
 			</div>
 			<div class="tab-pane box <?=($this->session->flashdata('active') == 3 ? 'active' : '');?>" id="upload">
-				<?php echo form_open_multipart($this->uri->uri_string(), array('class' 	=> 'validate')); ?>
+				<?php echo form_open_multipart($this->uri->uri_string() . ($is_superadmin ? '?branch_id=' . $selected_branch : ''), array('class' 	=> 'validate')); ?>
+				<?php if (!empty($is_superadmin) && $is_superadmin): ?>
+					<input type="hidden" name="branch_id" value="<?=$selected_branch?>">
+				<?php endif; ?>
 				<!-- all logo -->
 				<div class="headers-line">
 					<i class="fab fa-envira"></i> <?=translate('logo');?>

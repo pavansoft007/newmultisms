@@ -31,6 +31,13 @@ class Settings extends Admin_Controller
             access_denied();
         }
 
+        // Branch selection for superadmin
+        $is_superadmin = is_superadmin_loggedin();
+        $selected_branch = $is_superadmin ? $this->input->get_post('branch_id') : get_loggedin_branch_id();
+        if (empty($selected_branch)) {
+            $selected_branch = get_loggedin_branch_id();
+        }
+
         if ($_POST) {
             if (!get_permission('global_settings', 'is_edit')) {
                 access_denied();
@@ -40,7 +47,7 @@ class Settings extends Admin_Controller
         $config = array();
         if ($this->input->post('submit') == 'setting') {
             foreach ($this->input->post() as $input => $value) {
-                if ($input == 'submit') {
+                if ($input == 'submit' || $input == 'branch_id') {
                     continue;
                 }
                 $config[$input] = $value;
@@ -48,24 +55,39 @@ class Settings extends Admin_Controller
             if (empty($config['reg_prefix'])) {
                 $config['reg_prefix'] = false;
             }
-            $this->db->where('id', 1);
-            $this->db->update('global_settings', $config);
+            // Save settings for selected branch, fallback to global if not superadmin
+            $this->db->where('branch_id', $selected_branch);
+            $exists = $this->db->get('global_settings')->num_rows();
+            if ($exists) {
+                $this->db->where('branch_id', $selected_branch);
+                $this->db->update('global_settings', $config);
+            } else {
+                $config['branch_id'] = $selected_branch;
+                $this->db->insert('global_settings', $config);
+            }
             set_alert('success', translate('the_configuration_has_been_updated'));
-            redirect(current_url());
+            redirect(current_url() . ($is_superadmin ? '?branch_id=' . $selected_branch : ''));
         }
 
         if ($this->input->post('submit') == 'theme') {
             foreach ($this->input->post() as $input => $value) {
-                if ($input == 'submit') {
+                if ($input == 'submit' || $input == 'branch_id') {
                     continue;
                 }
                 $config[$input] = $value;
             }
-            $this->db->where('id', 1);
-            $this->db->update('theme_settings', $config);
+            $this->db->where('branch_id', $selected_branch);
+            $exists = $this->db->get('theme_settings')->num_rows();
+            if ($exists) {
+                $this->db->where('branch_id', $selected_branch);
+                $this->db->update('theme_settings', $config);
+            } else {
+                $config['branch_id'] = $selected_branch;
+                $this->db->insert('theme_settings', $config);
+            }
             set_alert('success', translate('the_configuration_has_been_updated'));
             $this->session->set_flashdata('active', 2);
-            redirect(current_url());
+            redirect(current_url() . ($is_superadmin ? '?branch_id=' . $selected_branch : ''));
         }
 
         if ($this->input->post('submit') == 'logo') {
@@ -83,9 +105,22 @@ class Settings extends Admin_Controller
 
             set_alert('success', translate('the_configuration_has_been_updated'));
             $this->session->set_flashdata('active', 3);
-            redirect(current_url());
+            redirect(current_url() . ($is_superadmin ? '?branch_id=' . $selected_branch : ''));
         }
 
+        // Load settings for selected branch, fallback to global (branch_id = 1 or 0)
+        $this->db->where('branch_id', $selected_branch);
+        $global_config = $this->db->get('global_settings')->row_array();
+        if (!$global_config) {
+            $this->db->where('branch_id', 1);
+            $global_config = $this->db->get('global_settings')->row_array();
+        }
+        $this->db->where('branch_id', $selected_branch);
+        $theme_config = $this->db->get('theme_settings')->row_array();
+        if (!$theme_config) {
+            $this->db->where('branch_id', 1);
+            $theme_config = $this->db->get('theme_settings')->row_array();
+        }
 
         $this->data['title'] = translate('global_settings');
         $this->data['sub_page'] = 'settings/universal';
@@ -98,6 +133,13 @@ class Settings extends Admin_Controller
                 'vendor/dropify/js/dropify.min.js',
             ),
         );
+        $this->data['global_config'] = $global_config;
+        $this->data['theme_config'] = $theme_config;
+        $this->data['selected_branch'] = $selected_branch;
+        $this->data['is_superadmin'] = $is_superadmin;
+        if ($is_superadmin) {
+            $this->data['branch_list'] = $this->db->get('branch')->result_array();
+        }
         $this->load->view('layout/index', $this->data);
     }
 
